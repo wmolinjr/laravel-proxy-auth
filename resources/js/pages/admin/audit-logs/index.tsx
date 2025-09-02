@@ -13,7 +13,7 @@ import AppLayout from '@/layouts/app-layout';
 import { adminRoutes } from '@/lib/admin-routes';
 import { type BreadcrumbItem, type AuditLog, type PaginatedResponse } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Download, Filter } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 interface AuditLogsIndexProps {
   auditLogs: PaginatedResponse<AuditLog>;
@@ -46,7 +46,7 @@ export default function AuditLogsIndex({
   entityTypes = [], 
   stats 
 }: AuditLogsIndexProps) {
-  const handleFilter = (key: string, value: string) => {
+  const handleFilter = (key: keyof typeof filters, value: string) => {
     const newFilters = { ...filters, [key]: value };
     if (value === '' || value === 'all') {
       delete newFilters[key];

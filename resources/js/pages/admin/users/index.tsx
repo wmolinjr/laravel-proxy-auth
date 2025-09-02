@@ -25,7 +25,6 @@ import { adminRoutes } from '@/lib/admin-routes';
 import { type BreadcrumbItem, type User, type PaginatedResponse } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Plus, Eye, Edit, Trash2, RotateCcw } from 'lucide-react';
-import { useState } from 'react';
 
 interface UsersIndexProps {
   users: PaginatedResponse<User>;
@@ -52,9 +51,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function UsersIndex({ users, filters, roles, stats }: UsersIndexProps) {
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-  const handleFilter = (key: string, value: string) => {
+  const handleFilter = (key: keyof typeof filters, value: string) => {
     const newFilters = { ...filters, [key]: value };
     if (value === '' || value === 'all') {
       delete newFilters[key];

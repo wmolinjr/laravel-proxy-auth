@@ -6,7 +6,7 @@ import { dashboard } from '@/routes';
 import { adminRoutes } from '@/lib/admin-routes';
 import { type NavItem, type User } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, Shield, Key, Activity, Settings, BarChart3, AlertTriangle, FileText } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Users, Shield, Key, Settings, BarChart3, AlertTriangle, FileText } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -77,19 +77,17 @@ const footerNavItems: NavItem[] = [
 export function AppSidebar() {
     const page = usePage<{ auth: { user: User } }>();
     const isAdmin = page.props.auth?.user?.is_admin || false;
-    const currentUrl = page.url;
-    
+
     // Since system is exclusively admin, show admin navigation if user is admin
-    const showAdminNav = isAdmin;
-    const navItems = showAdminNav ? adminNavItems : mainNavItems;
-    
+    const navItems = isAdmin ? adminNavItems : mainNavItems;
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={showAdminNav ? adminRoutes.dashboard() : dashboard()} prefetch>
+                            <Link href={isAdmin ? adminRoutes.dashboard() : dashboard()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -99,7 +97,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={navItems} />
-                
+
                 {/* System is exclusively admin, no need for switching */}
             </SidebarContent>
 

@@ -59,13 +59,14 @@ export const adminRoutes = {
   },
 } as const;
 
+// Utility functions - currently not used but available for future implementation
+
 // Utility function to check if current route is admin (now all routes are admin)
-export const isAdminRoute = (url: string): boolean => {
+export const isAdminRoute = (): boolean => {
   return true; // All routes are now admin routes
 };
 
-// Get admin section from URL
-export const getAdminSection = (url: string): string | null => {
-  const pathParts = url.split('/').filter(Boolean);
-  return pathParts[0] || null;
+// Get admin section from URL - placeholder for future implementation  
+export const getAdminSection = (): string | null => {
+  return null; // Future implementation
 };

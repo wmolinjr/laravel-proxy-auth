@@ -15,7 +15,6 @@ import {
   BarChart3,
   Activity,
   TrendingUp,
-  Clock,
   ExternalLink 
 } from 'lucide-react';
 

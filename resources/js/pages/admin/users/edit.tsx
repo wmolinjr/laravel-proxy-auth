@@ -37,7 +37,7 @@ export default function EditUser({ user, roles }: EditUserProps) {
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Admin', href: adminRoutes.dashboard() },
     { title: 'Users', href: adminRoutes.users.index() },
-    { title: `Edit ${user.name}` },
+    { title: `Edit ${user.name}`, href: adminRoutes.users.edit(user.id) },
   ];
 
   const { data, setData, put, processing, errors } = useForm({
@@ -107,8 +107,8 @@ export default function EditUser({ user, roles }: EditUserProps) {
                     type="text"
                     value={data.name}
                     onChange={(e) => setData('name', e.target.value)}
-                    error={errors.name}
                     required
+                    aria-invalid={!!errors.name}
                   />
                   {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                 </div>
@@ -120,8 +120,8 @@ export default function EditUser({ user, roles }: EditUserProps) {
                     type="email"
                     value={data.email}
                     onChange={(e) => setData('email', e.target.value)}
-                    error={errors.email}
                     required
+                    aria-invalid={!!errors.email}
                   />
                   {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                 </div>
@@ -133,8 +133,8 @@ export default function EditUser({ user, roles }: EditUserProps) {
                     type="password"
                     value={data.password}
                     onChange={(e) => setData('password', e.target.value)}
-                    error={errors.password}
                     placeholder="Leave blank to keep current password"
+                    aria-invalid={!!errors.password}
                   />
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
@@ -146,8 +146,8 @@ export default function EditUser({ user, roles }: EditUserProps) {
                     type="password"
                     value={data.password_confirmation}
                     onChange={(e) => setData('password_confirmation', e.target.value)}
-                    error={errors.password_confirmation}
                     placeholder="Confirm new password"
+                    aria-invalid={!!errors.password_confirmation}
                   />
                   {errors.password_confirmation && (
                     <p className="text-sm text-destructive">{errors.password_confirmation}</p>

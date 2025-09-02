@@ -23,7 +23,7 @@ import AppLayout from '@/layouts/app-layout';
 import { adminRoutes } from '@/lib/admin-routes';
 import { type BreadcrumbItem, type OAuthClient, type PaginatedResponse } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Eye, Edit, Trash2, Shield, Key, RotateCcw } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, Key } from 'lucide-react';
 
 interface OAuthClientsIndexProps {
   clients: PaginatedResponse<OAuthClient>;
@@ -48,7 +48,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function OAuthClientsIndex({ clients, filters, stats }: OAuthClientsIndexProps) {
-  const handleFilter = (key: string, value: string) => {
+  const handleFilter = (key: keyof typeof filters, value: string) => {
     const newFilters = { ...filters, [key]: value };
     if (value === '' || value === 'all') {
       delete newFilters[key];

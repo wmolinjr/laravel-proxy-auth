@@ -37,20 +37,22 @@ const scopeColors = {
 };
 
 export default function Authorize({ client, scopes, user }: AuthorizeProps) {
-  const { post, processing } = useForm();
+  const { setData, post, processing } = useForm({
+    approve: 'yes'
+  });
 
   const handleApprove = (e: FormEvent) => {
     e.preventDefault();
+    setData('approve', 'yes');
     post('/oauth/authorize', {
-      data: { approve: 'yes' },
       preserveScroll: true,
     });
   };
 
   const handleDeny = (e: FormEvent) => {
     e.preventDefault();
+    setData('approve', 'no');
     post('/oauth/authorize', {
-      data: { approve: 'no' },
       preserveScroll: true,
     });
   };

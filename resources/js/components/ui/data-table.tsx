@@ -8,13 +8,14 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// Select components are available for future use
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@inertiajs/react";
 import {
@@ -30,7 +31,7 @@ import { cn } from "@/lib/utils";
 export interface Column<T> {
   key: string;
   label: string;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
   sortable?: boolean;
   className?: string;
 }
@@ -56,7 +57,7 @@ interface DataTableProps<T> {
   className?: string;
 }
 
-export function DataTable<T extends Record<string, any>>({
+export function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
   pagination,
@@ -191,7 +192,7 @@ export function DataTable<T extends Record<string, any>>({
               disabled={!pagination.links[pagination.links.length - 2]?.url}
             >
               {pagination.links[pagination.links.length - 2]?.url ? (
-                <Link href={pagination.links[pagination.links.length - 2].url}>
+                <Link href={pagination.links[pagination.links.length - 2].url!}>
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               ) : (
@@ -207,7 +208,7 @@ export function DataTable<T extends Record<string, any>>({
               disabled={!pagination.links[pagination.links.length - 1]?.url}
             >
               {pagination.links[pagination.links.length - 1]?.url ? (
-                <Link href={pagination.links[pagination.links.length - 1].url}>
+                <Link href={pagination.links[pagination.links.length - 1].url!}>
                   <ChevronsRight className="h-4 w-4" />
                 </Link>
               ) : (

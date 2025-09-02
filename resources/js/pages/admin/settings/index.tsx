@@ -45,10 +45,10 @@ const categoryTitles = {
 };
 
 export default function SystemSettings({ settings }: SystemSettingsProps) {
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [changedSettings, setChangedSettings] = useState<Set<string>>(new Set());
 
-  const handleSettingChange = (key: string, value: any, type: string) => {
+  const handleSettingChange = (key: string, value: unknown, type: string) => {
     let processedValue = value;
     
     // Process value based on type
@@ -97,7 +97,7 @@ export default function SystemSettings({ settings }: SystemSettingsProps) {
               onCheckedChange={(checked) => handleSettingChange(setting.key, checked, 'boolean')}
             />
             <Label htmlFor={setting.key} className="text-sm">
-              {Boolean(value) ? 'Enabled' : 'Disabled'}
+              {value ? 'Enabled' : 'Disabled'}
             </Label>
           </div>
         );

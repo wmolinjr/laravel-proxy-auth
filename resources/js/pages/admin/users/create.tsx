@@ -22,7 +22,7 @@ interface CreateUserProps {
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Admin', href: adminRoutes.dashboard() },
   { title: 'Users', href: adminRoutes.users.index() },
-  { title: 'Create User' },
+  { title: 'Create User', href: adminRoutes.users.create() },
 ];
 
 export default function CreateUser({ roles }: CreateUserProps) {
@@ -93,8 +93,8 @@ export default function CreateUser({ roles }: CreateUserProps) {
                     type="text"
                     value={data.name}
                     onChange={(e) => setData('name', e.target.value)}
-                    error={errors.name}
                     required
+                    aria-invalid={!!errors.name}
                   />
                   {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                 </div>
@@ -106,8 +106,8 @@ export default function CreateUser({ roles }: CreateUserProps) {
                     type="email"
                     value={data.email}
                     onChange={(e) => setData('email', e.target.value)}
-                    error={errors.email}
                     required
+                    aria-invalid={!!errors.email}
                   />
                   {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                 </div>
@@ -119,8 +119,8 @@ export default function CreateUser({ roles }: CreateUserProps) {
                     type="password"
                     value={data.password}
                     onChange={(e) => setData('password', e.target.value)}
-                    error={errors.password}
                     required
+                    aria-invalid={!!errors.password}
                   />
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
@@ -132,8 +132,8 @@ export default function CreateUser({ roles }: CreateUserProps) {
                     type="password"
                     value={data.password_confirmation}
                     onChange={(e) => setData('password_confirmation', e.target.value)}
-                    error={errors.password_confirmation}
                     required
+                    aria-invalid={!!errors.password_confirmation}
                   />
                   {errors.password_confirmation && (
                     <p className="text-sm text-destructive">{errors.password_confirmation}</p>

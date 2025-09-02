@@ -16,7 +16,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -60,7 +59,7 @@ export default function SecurityEventsIndex({
   const [resolveDialog, setResolveDialog] = useState<SecurityEvent | null>(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
 
-  const handleFilter = (key: string, value: string) => {
+  const handleFilter = (key: keyof typeof filters, value: string) => {
     const newFilters = { ...filters, [key]: value };
     if (value === '' || value === 'all') {
       delete newFilters[key];

@@ -16,8 +16,6 @@ import {
   Calendar, 
   Clock, 
   Shield, 
-  Key, 
-  Activity,
   AlertCircle,
   CheckCircle,
   XCircle

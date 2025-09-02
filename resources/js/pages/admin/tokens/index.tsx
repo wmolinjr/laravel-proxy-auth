@@ -20,11 +20,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import AppLayout from '@/layouts/app-layout';
 import { adminRoutes } from '@/lib/admin-routes';
 import { type BreadcrumbItem, type OAuthToken, type PaginatedResponse, type OAuthClient, type User } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Trash2, Clock, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { Eye, Trash2, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 interface TokensIndexProps {
@@ -59,14 +68,13 @@ export default function TokensIndex({
   tokens, 
   filters, 
   clients, 
-  users, 
   availableScopes, 
   stats 
 }: TokensIndexProps) {
   const [bulkActionDialog, setBulkActionDialog] = useState(false);
   const [selectedTokens, setSelectedTokens] = useState<number[]>([]);
 
-  const handleFilter = (key: string, value: string) => {
+  const handleFilter = (key: keyof typeof filters, value: string) => {
     const newFilters = { ...filters, [key]: value };
     if (value === '' || value === 'all') {
       delete newFilters[key];
@@ -94,20 +102,7 @@ export default function TokensIndex({
   const columns: Column<OAuthToken>[] = [
     {
       key: 'select',
-      label: (
-        <input
-          type="checkbox"
-          checked={selectedTokens.length === tokens.data.length && tokens.data.length > 0}
-          onChange={(e) => {
-            if (e.target.checked) {
-              setSelectedTokens(tokens.data.map(t => t.id));
-            } else {
-              setSelectedTokens([]);
-            }
-          }}
-          className="rounded border-gray-300"
-        />
-      ),
+      label: 'Select',
       render: (_, token) => (
         <input
           type="checkbox"

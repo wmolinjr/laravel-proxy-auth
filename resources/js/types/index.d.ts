@@ -111,9 +111,9 @@ export interface AuditLog {
     user?: User;
     ip_address?: string;
     user_agent?: string;
-    old_values?: Record<string, any>;
-    new_values?: Record<string, any>;
-    metadata?: Record<string, any>;
+    old_values?: Record<string, unknown>;
+    new_values?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
     created_at: string;
 }
 
@@ -128,7 +128,7 @@ export interface SecurityEvent {
     ip_address?: string;
     country_code?: string;
     user_agent?: string;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
     is_resolved: boolean;
     resolved_at?: string;
     resolved_by?: User;
@@ -139,7 +139,7 @@ export interface SecurityEvent {
 export interface SystemSetting {
     id: number;
     key: string;
-    value: any;
+    value: unknown;
     is_encrypted: boolean;
     description?: string;
     category: string;
