@@ -3,14 +3,18 @@
 namespace App\Models\OAuth;
 
 use App\Models\User;
+use Database\Factories\OAuth\OAuthClientFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OAuthClient extends Model
 {
+    use HasFactory;
+
     protected $table = 'oauth_clients';
-    
+
     public $incrementing = false;
     protected $keyType = 'string';
 
@@ -31,6 +35,7 @@ class OAuthClient extends Model
         'health_check_url',
         'health_check_interval',
         'health_check_enabled',
+        'health_check_failures',
         'last_health_check',
         'health_status',
         'last_error_message',
@@ -41,6 +46,9 @@ class OAuthClient extends Model
         'environment',
         'tags',
         'contact_email',
+        'website_url',
+        'max_concurrent_tokens',
+        'rate_limit_per_minute',
         'version',
         'created_by',
         'updated_by',
@@ -76,7 +84,7 @@ class OAuthClient extends Model
     }
 
     /**
-     * Get all authorization codes for this client  
+     * Get all authorization codes for this client
      */
     public function authorizationCodes(): HasMany
     {
@@ -113,14 +121,6 @@ class OAuthClient extends Model
     public function usageRecords(): HasMany
     {
         return $this->hasMany(OAuthClientUsage::class, 'client_id');
-    }
-
-    /**
-     * Get all events for this client
-     */
-    public function events(): HasMany
-    {
-        return $this->hasMany(OAuthClientEvent::class, 'client_id');
     }
 
     /**
@@ -290,5 +290,13 @@ class OAuthClient extends Model
     public function touchActivity(): void
     {
         $this->update(['last_activity_at' => now()]);
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): OAuthClientFactory
+    {
+        return OAuthClientFactory::new();
     }
 }

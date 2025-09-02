@@ -92,22 +92,22 @@ class OAuthClientController extends Controller
     public function create(): Response
     {
         return Inertia::render('admin/oauth-clients/create', [
-            'availableGrants' => [
-                'authorization_code' => 'Authorization Code',
-                'client_credentials' => 'Client Credentials',
-                'refresh_token' => 'Refresh Token',
+            'grants' => [
+                'authorization_code',
+                'client_credentials', 
+                'refresh_token',
             ],
-            'availableScopes' => [
-                'read' => 'Read access',
-                'write' => 'Write access',
-                'openid' => 'OpenID Connect',
-                'profile' => 'User profile',
-                'email' => 'Email address',
+            'scopes' => [
+                'read',
+                'write',
+                'openid',
+                'profile',
+                'email',
             ],
-            'availableEnvironments' => [
-                'production' => 'Production',
-                'staging' => 'Staging',
-                'development' => 'Development',
+            'environments' => [
+                'production',
+                'staging',
+                'development',
             ],
         ]);
     }
@@ -126,12 +126,12 @@ class OAuthClientController extends Controller
             'is_confidential' => 'required|boolean',
             'environment' => 'required|string|in:production,staging,development',
             'contact_email' => 'nullable|email|max:255',
-            'version' => 'nullable|string|max:50',
-            'tags' => 'nullable|array',
-            'tags.*' => 'string|max:50',
+            'website_url' => 'nullable|url|max:500',
             'health_check_enabled' => 'boolean',
             'health_check_url' => 'nullable|required_if:health_check_enabled,true|url|max:500',
             'health_check_interval' => 'nullable|integer|min:60|max:86400',
+            'max_concurrent_tokens' => 'nullable|integer|min:1',
+            'rate_limit_per_minute' => 'nullable|integer|min:1',
         ]);
 
         $client = $this->clientService->createClient($validated);
@@ -268,23 +268,36 @@ class OAuthClientController extends Controller
                 'id' => $oauthClient->id,
                 'name' => $oauthClient->name,
                 'description' => $oauthClient->description,
-                'redirect_uris' => $oauthClient->redirect_uris,
-                'grants' => $oauthClient->grants,
-                'scopes' => $oauthClient->scopes,
+                'redirect_uris' => $oauthClient->redirect_uris ?? [],
+                'grants' => $oauthClient->grants ?? [],
+                'scopes' => $oauthClient->scopes ?? [],
                 'is_confidential' => $oauthClient->is_confidential,
                 'is_active' => $oauthClient->is_active,
+                'environment' => $oauthClient->environment,
+                'health_check_enabled' => $oauthClient->health_check_enabled,
+                'health_check_url' => $oauthClient->health_check_url,
+                'health_check_interval' => $oauthClient->health_check_interval,
+                'max_concurrent_tokens' => $oauthClient->max_concurrent_tokens,
+                'rate_limit_per_minute' => $oauthClient->rate_limit_per_minute,
+                'contact_email' => $oauthClient->contact_email,
+                'website_url' => $oauthClient->website_url,
             ],
-            'availableGrants' => [
-                'authorization_code' => 'Authorization Code',
-                'client_credentials' => 'Client Credentials',
-                'refresh_token' => 'Refresh Token',
+            'grants' => [
+                'authorization_code',
+                'client_credentials',
+                'refresh_token',
             ],
-            'availableScopes' => [
-                'read' => 'Read access',
-                'write' => 'Write access',
-                'openid' => 'OpenID Connect',
-                'profile' => 'User profile',
-                'email' => 'Email address',
+            'scopes' => [
+                'read',
+                'write', 
+                'openid',
+                'profile',
+                'email',
+            ],
+            'environments' => [
+                'production',
+                'staging',
+                'development',
             ],
         ]);
     }
@@ -303,17 +316,18 @@ class OAuthClientController extends Controller
             'grants.*' => 'required|string|in:authorization_code,client_credentials,refresh_token',
             'scopes' => 'nullable|array',
             'scopes.*' => 'required|string|in:read,write,openid,profile,email',
-            'is_active' => 'boolean',
+            'is_confidential' => 'boolean',
+            'environment' => 'required|string|in:production,staging,development',
+            'contact_email' => 'nullable|email|max:255',
+            'website_url' => 'nullable|url|max:500',
+            'health_check_enabled' => 'boolean',
+            'health_check_url' => 'nullable|required_if:health_check_enabled,true|url|max:500',
+            'health_check_interval' => 'nullable|integer|min:60|max:86400',
+            'max_concurrent_tokens' => 'nullable|integer|min:1',
+            'rate_limit_per_minute' => 'nullable|integer|min:1',
         ]);
 
-        $oauthClient->update([
-            'name' => $validated['name'],
-            'description' => $validated['description'] ?? null,
-            'redirect_uris' => $validated['redirect_uris'],
-            'grants' => $validated['grants'],
-            'scopes' => $validated['scopes'] ?? [],
-            'is_active' => $validated['is_active'] ?? $oauthClient->is_active,
-        ]);
+        $oauthClient->update($validated);
 
         return redirect()->route('oauth-clients.show', $oauthClient)
             ->with('success', 'Cliente OAuth atualizado com sucesso.');
