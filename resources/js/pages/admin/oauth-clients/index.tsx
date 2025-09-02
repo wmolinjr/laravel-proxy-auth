@@ -1,6 +1,9 @@
 import { DataTable, Column, StatusBadge, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { HealthStatus, HealthIndicator } from '@/components/ui/health-status';
+import { MetricCard, UsageMetrics } from '@/components/ui/monitoring-metrics';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -23,7 +26,7 @@ import AppLayout from '@/layouts/app-layout';
 import { adminRoutes } from '@/lib/admin-routes';
 import { type BreadcrumbItem, type OAuthClient, type PaginatedResponse } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Eye, Edit, Trash2, Key } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, Key, Settings, Activity, AlertTriangle, Clock, RefreshCw } from 'lucide-react';
 
 interface OAuthClientsIndexProps {
   clients: PaginatedResponse<OAuthClient>;
@@ -31,6 +34,9 @@ interface OAuthClientsIndexProps {
     search?: string;
     status?: string;
     confidential?: string;
+    health_status?: string;
+    environment?: string;
+    maintenance_mode?: string;
     sort?: string;
     order?: string;
   };
@@ -39,6 +45,12 @@ interface OAuthClientsIndexProps {
     active: number;
     confidential: number;
     public: number;
+    healthy: number;
+    unhealthy: number;
+    maintenance: number;
+    production: number;
+    staging: number;
+    development: number;
   };
 }
 
@@ -91,6 +103,9 @@ export default function OAuthClientsIndex({ clients, filters, stats }: OAuthClie
             status={client.is_confidential ? 'Confidential' : 'Public'}
             variant={client.is_confidential ? 'default' : 'secondary'}
           />
+          <Badge variant="outline" className="text-xs capitalize">
+            {client.environment}
+          </Badge>
           {client.has_secret && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Key className="h-3 w-3" />
@@ -145,10 +160,22 @@ export default function OAuthClientsIndex({ clients, filters, stats }: OAuthClie
       key: 'status',
       label: 'Status',
       render: (_, client) => (
-        <StatusBadge 
-          status={client.is_active ? 'Active' : 'Inactive'}
-          variant={client.is_active ? 'default' : 'secondary'}
-        />
+        <div className="flex flex-col gap-2">
+          <StatusBadge 
+            status={client.is_active ? 'Active' : 'Inactive'}
+            variant={client.is_active ? 'default' : 'secondary'}
+          />
+          <HealthIndicator 
+            status={client.health_status}
+            lastCheckedAt={client.last_health_check_at}
+          />
+          {client.maintenance_mode && (
+            <Badge variant="outline" className="text-xs text-yellow-600">
+              <Settings className="h-3 w-3 mr-1" />
+              Maintenance
+            </Badge>
+          )}
+        </div>
       ),
     },
     {
@@ -163,12 +190,22 @@ export default function OAuthClientsIndex({ clients, filters, stats }: OAuthClie
       label: 'Actions',
       render: (_, client) => (
         <div className="flex items-center gap-1">
-          <ActionButton href={adminRoutes.oauthClients.show(client.id)} variant="ghost">
+          <ActionButton href={adminRoutes.oauthClients.show(client.id)} variant="ghost" title="View Details">
             <Eye className="h-4 w-4" />
           </ActionButton>
-          <ActionButton href={adminRoutes.oauthClients.edit(client.id)} variant="ghost">
+          <ActionButton href={adminRoutes.oauthClients.edit(client.id)} variant="ghost" title="Edit Client">
             <Edit className="h-4 w-4" />
           </ActionButton>
+          {client.health_check_enabled && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => router.post(adminRoutes.oauthClients.healthCheck(client.id))}
+              title="Run Health Check"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          )}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="ghost" size="sm">
@@ -228,6 +265,37 @@ export default function OAuthClientsIndex({ clients, filters, stats }: OAuthClie
           <SelectItem value="false">Public</SelectItem>
         </SelectContent>
       </Select>
+
+      <Select 
+        value={filters.health_status || 'all'} 
+        onValueChange={(value) => handleFilter('health_status', value)}
+      >
+        <SelectTrigger className="w-36">
+          <SelectValue placeholder="Health" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All health</SelectItem>
+          <SelectItem value="healthy">Healthy</SelectItem>
+          <SelectItem value="unhealthy">Unhealthy</SelectItem>
+          <SelectItem value="error">Error</SelectItem>
+          <SelectItem value="unknown">Unknown</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select 
+        value={filters.environment || 'all'} 
+        onValueChange={(value) => handleFilter('environment', value)}
+      >
+        <SelectTrigger className="w-36">
+          <SelectValue placeholder="Environment" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All environments</SelectItem>
+          <SelectItem value="production">Production</SelectItem>
+          <SelectItem value="staging">Staging</SelectItem>
+          <SelectItem value="development">Development</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 
@@ -256,24 +324,63 @@ export default function OAuthClientsIndex({ clients, filters, stats }: OAuthClie
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-lg border p-4">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-sm text-muted-foreground">Total Clients</div>
-          </div>
-          <div className="rounded-lg border p-4">
-            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
-            <div className="text-sm text-muted-foreground">Active</div>
-          </div>
-          <div className="rounded-lg border p-4">
-            <div className="text-2xl font-bold text-blue-600">{stats.confidential}</div>
-            <div className="text-sm text-muted-foreground">Confidential</div>
-          </div>
-          <div className="rounded-lg border p-4">
-            <div className="text-2xl font-bold text-gray-600">{stats.public}</div>
-            <div className="text-sm text-muted-foreground">Public</div>
-          </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            title="Total Clients"
+            value={stats.total}
+            description={`${stats.active} active`}
+            icon={Activity}
+          />
+          <MetricCard
+            title="Health Status"
+            value={stats.healthy}
+            description={`${stats.unhealthy + (stats.total - stats.healthy - stats.unhealthy)} need attention`}
+            trend={stats.healthy / stats.total > 0.8 ? 'up' : 'down'}
+            icon={AlertTriangle}
+          />
+          <MetricCard
+            title="Production"
+            value={stats.production || 0}
+            description={`${stats.staging || 0} staging, ${stats.development || 0} dev`}
+            icon={Settings}
+          />
+          <MetricCard
+            title="Maintenance"
+            value={stats.maintenance || 0}
+            description="Clients in maintenance mode"
+            trend={stats.maintenance === 0 ? 'up' : 'neutral'}
+            icon={Clock}
+          />
         </div>
+
+        {/* Quick Actions */}
+        {(stats.unhealthy > 0 || stats.maintenance > 0) && (
+          <Card className="border-yellow-200 bg-yellow-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                  <div>
+                    <p className="font-medium text-yellow-800">Attention Required</p>
+                    <p className="text-sm text-yellow-600">
+                      {stats.unhealthy > 0 && `${stats.unhealthy} unhealthy clients`}
+                      {stats.unhealthy > 0 && stats.maintenance > 0 && ', '}
+                      {stats.maintenance > 0 && `${stats.maintenance} in maintenance`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleFilter('health_status', 'unhealthy')}>
+                    View Unhealthy
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleFilter('maintenance_mode', 'true')}>
+                    View Maintenance
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Clients Table */}
         <DataTable

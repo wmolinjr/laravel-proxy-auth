@@ -85,6 +85,76 @@ export interface OAuthClient {
     authorization_codes_count?: number;
     created_at: string;
     updated_at: string;
+    // Enhanced monitoring fields
+    health_check_url?: string;
+    health_check_interval: number;
+    health_check_enabled: boolean;
+    health_status: 'unknown' | 'healthy' | 'unhealthy' | 'error';
+    last_health_check_at?: string;
+    health_check_failures: number;
+    maintenance_mode: boolean;
+    maintenance_reason?: string;
+    environment: 'production' | 'staging' | 'development';
+    owner_contact?: string;
+    technical_contact?: string;
+    max_concurrent_tokens: number;
+    rate_limit_per_minute: number;
+    tags?: string;
+    website_url?: string;
+    documentation_url?: string;
+    privacy_policy_url?: string;
+    terms_of_service_url?: string;
+    logo_url?: string;
+    // Computed properties
+    usage_stats?: OAuthClientUsage;
+    recent_events?: OAuthClientEvent[];
+}
+
+export interface OAuthClientUsage {
+    id: number;
+    client_id: number;
+    date: string;
+    authorization_requests: number;
+    successful_authorizations: number;
+    failed_authorizations: number;
+    token_requests: number;
+    successful_tokens: number;
+    failed_tokens: number;
+    active_users: number;
+    unique_users: number;
+    api_calls: number;
+    bytes_transferred: number;
+    average_response_time: number;
+    peak_concurrent_users: number;
+    error_count: number;
+    last_activity_at?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface OAuthClientEvent {
+    id: number;
+    client_id: number;
+    event_type: string;
+    event_name: string;
+    event_description?: string;
+    severity: 'info' | 'warning' | 'error' | 'critical';
+    severity_color?: string;
+    data?: Record<string, unknown>;
+    occurred_at: string;
+    ip_address?: string;
+    user_agent?: string;
+    user_id?: number;
+    is_resolved: boolean;
+    resolved_at?: string;
+    resolved_by_id?: number;
+    resolution_notes?: string;
+    created_at: string;
+    updated_at: string;
+    // Relationships
+    oauth_client?: OAuthClient;
+    user?: User;
+    resolved_by?: User;
 }
 
 export interface OAuthToken {

@@ -239,14 +239,16 @@ export const ActionButton = ({
   href, 
   children, 
   variant = "ghost",
-  size = "sm"
+  size = "sm",
+  title
 }: { 
   href: string; 
   children: React.ReactNode;
   variant?: "ghost" | "outline" | "secondary";
   size?: "sm" | "default";
+  title?: string;
 }) => (
   <Button variant={variant} size={size} asChild>
-    <Link href={href}>{children}</Link>
+    <Link href={href} title={title}>{children}</Link>
   </Button>
 );

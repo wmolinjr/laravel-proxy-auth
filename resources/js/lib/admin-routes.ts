@@ -28,6 +28,11 @@ export const adminRoutes = {
     destroy: (id: number) => `/oauth-clients/${id}`,
     regenerateSecret: (id: number) => `/oauth-clients/${id}/regenerate-secret`,
     revokeTokens: (id: number) => `/oauth-clients/${id}/revoke-tokens`,
+    healthCheck: (id: number) => `/oauth-clients/${id}/health-check`,
+    toggleStatus: (id: number) => `/oauth-clients/${id}/toggle-status`,
+    toggleMaintenance: (id: number) => `/oauth-clients/${id}/toggle-maintenance`,
+    analytics: (id: number) => `/oauth-clients/${id}/analytics`,
+    events: (id: number) => `/oauth-clients/${id}/events`,
   },
 
   // Token Management

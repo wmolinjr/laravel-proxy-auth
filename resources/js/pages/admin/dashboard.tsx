@@ -2,9 +2,12 @@ import { StatsCard } from '@/components/ui/stats-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { HealthStatus } from '@/components/ui/health-status';
+import { MetricCard, RecentEvents } from '@/components/ui/monitoring-metrics';
+import { AnalyticsChart, Sparkline } from '@/components/ui/analytics-chart';
 import AppLayout from '@/layouts/app-layout';
 import { adminRoutes } from '@/lib/admin-routes';
-import { type BreadcrumbItem, type DashboardStats, type SecurityEvent, type AuditLog } from '@/types';
+import { type BreadcrumbItem, type DashboardStats, type SecurityEvent, type AuditLog, type OAuthClient, type OAuthClientEvent } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { 
   Users, 
@@ -22,6 +25,17 @@ interface AdminDashboardProps {
   stats: DashboardStats;
   recentEvents: SecurityEvent[];
   recentAuditLogs: AuditLog[];
+  oauthClients: OAuthClient[];
+  oauthEvents: OAuthClientEvent[];
+  oauthStats: {
+    healthy: number;
+    unhealthy: number;
+    maintenance: number;
+    total_requests_today: number;
+    success_rate: number;
+    avg_response_time: number;
+    usage_trend: Array<{ date: string; value: number }>;
+  };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -31,7 +45,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function AdminDashboard({ stats, recentEvents, recentAuditLogs }: AdminDashboardProps) {
+export default function AdminDashboard({ stats, recentEvents, recentAuditLogs, oauthClients = [], oauthEvents = [], oauthStats }: AdminDashboardProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Admin Dashboard" />
@@ -75,30 +89,122 @@ export default function AdminDashboard({ stats, recentEvents, recentAuditLogs }:
           />
           
           <StatsCard
-            title="Active Tokens"
-            value={stats.tokens.active.toLocaleString()}
-            description={`${stats.tokens.issued_today} issued today`}
+            title="OAuth Requests"
+            value={oauthStats?.total_requests_today?.toLocaleString() || '0'}
+            description={`${oauthStats?.success_rate?.toFixed(1) || 0}% success rate`}
             icon={Key}
+            trend={oauthStats?.success_rate >= 95 ? { value: oauthStats.success_rate, isPositive: true } : undefined}
           />
           
           <StatsCard
             title="OAuth Clients"
             value={stats.oauth_clients.total}
-            description={`${stats.oauth_clients.active} active`}
+            description={`${oauthStats?.healthy || 0} healthy, ${oauthStats?.unhealthy || 0} unhealthy`}
             icon={Shield}
+            className={oauthStats?.unhealthy > 0 ? "border-orange-500" : ""}
           />
           
           <StatsCard
-            title="Security Events"
-            value={stats.security.unresolved_events}
-            description={`${stats.security.events_today} today`}
-            icon={AlertTriangle}
-            className={stats.security.unresolved_events > 0 ? "border-destructive" : ""}
+            title="Response Time"
+            value={`${oauthStats?.avg_response_time || 0}ms`}
+            description="Average response time"
+            icon={Activity}
+            className={oauthStats?.avg_response_time > 1000 ? "border-yellow-500" : ""}
           />
         </div>
 
+        {/* OAuth Health Overview */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              OAuth System Health
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+              <MetricCard
+                title="Healthy Clients"
+                value={oauthStats?.healthy || 0}
+                icon={Activity}
+                className="border-green-200"
+              />
+              <MetricCard
+                title="Unhealthy"
+                value={oauthStats?.unhealthy || 0}
+                icon={AlertTriangle}
+                className={oauthStats?.unhealthy > 0 ? "border-red-200" : ""}
+              />
+              <MetricCard
+                title="Maintenance"
+                value={oauthStats?.maintenance || 0}
+                icon={Activity}
+                className="border-yellow-200"
+              />
+              <div className="col-span-2">
+                <AnalyticsChart
+                  title="Usage Trend (7 days)"
+                  data={oauthStats?.usage_trend || []}
+                  type="area"
+                  height={100}
+                  showTrend={false}
+                  className="h-auto"
+                />
+              </div>
+            </div>
+            
+            {/* Client Health Status */}
+            {oauthClients.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h4 className="font-medium text-sm">Client Status Overview</h4>
+                <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                  {oauthClients.slice(0, 6).map((client) => (
+                    <div key={client.id} className="flex items-center justify-between p-2 border rounded">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <HealthStatus status={client.health_status} size="sm" showText={false} />
+                        <span className="text-sm truncate">{client.name}</span>
+                        <Badge variant="outline" className="text-xs capitalize shrink-0">
+                          {client.environment}
+                        </Badge>
+                      </div>
+                      {client.usage_stats && (
+                        <Sparkline 
+                          data={[client.usage_stats.api_calls]} 
+                          className="ml-2" 
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {oauthClients.length > 6 && (
+                  <Button variant="ghost" size="sm" asChild className="w-full mt-2">
+                    <Link href={adminRoutes.oauthClients.index()}>
+                      View all {oauthClients.length} OAuth clients
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Main Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Recent OAuth Events */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-semibold">OAuth Events</CardTitle>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={adminRoutes.oauthClients.index()}>
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <RecentEvents events={oauthEvents} maxEvents={3} className="border-0 shadow-none p-0" />
+            </CardContent>
+          </Card>
+
           {/* Recent Security Events */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

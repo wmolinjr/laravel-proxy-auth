@@ -25,6 +25,16 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         ->name('oauth-clients.regenerate-secret');
     Route::post('oauth-clients/{oauthClient}/revoke-tokens', [OAuthClientController::class, 'revokeTokens'])
         ->name('oauth-clients.revoke-tokens');
+    
+    // Enhanced OAuth Client Management
+    Route::prefix('oauth-clients/{oauthClient}')->name('oauth-clients.')->group(function () {
+        Route::post('/toggle-status', [OAuthClientController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/toggle-maintenance', [OAuthClientController::class, 'toggleMaintenance'])->name('toggle-maintenance');
+        Route::post('/health-check', [OAuthClientController::class, 'healthCheck'])->name('health-check');
+        Route::get('/analytics', [OAuthClientController::class, 'analytics'])->name('analytics');
+        Route::get('/events', [OAuthClientController::class, 'events'])->name('events');
+        Route::get('/usage', [OAuthClientController::class, 'usage'])->name('usage');
+    });
 
     // Token Management
     Route::resource('tokens', App\Http\Controllers\Admin\TokenController::class)->only(['index', 'show', 'destroy']);
