@@ -1,0 +1,71 @@
+// Admin route helpers - manually created since routes are not auto-generated yet
+export const adminRoutes = {
+  // Dashboard
+  dashboard: () => '/dashboard',
+  analytics: () => '/analytics',
+
+  // User Management
+  users: {
+    index: () => '/users',
+    create: () => '/users/create',
+    show: (id: number) => `/users/${id}`,
+    edit: (id: number) => `/users/${id}/edit`,
+    store: () => '/users',
+    update: (id: number) => `/users/${id}`,
+    destroy: (id: number) => `/users/${id}`,
+    restore: (id: number) => `/users/${id}/restore`,
+    forceDelete: (id: number) => `/users/${id}/force-delete`,
+  },
+
+  // OAuth Client Management
+  oauthClients: {
+    index: () => '/oauth-clients',
+    create: () => '/oauth-clients/create',
+    show: (id: number) => `/oauth-clients/${id}`,
+    edit: (id: number) => `/oauth-clients/${id}/edit`,
+    store: () => '/oauth-clients',
+    update: (id: number) => `/oauth-clients/${id}`,
+    destroy: (id: number) => `/oauth-clients/${id}`,
+    regenerateSecret: (id: number) => `/oauth-clients/${id}/regenerate-secret`,
+    revokeTokens: (id: number) => `/oauth-clients/${id}/revoke-tokens`,
+  },
+
+  // Token Management
+  tokens: {
+    index: () => '/tokens',
+    show: (id: number) => `/tokens/${id}`,
+    destroy: (id: number) => `/tokens/${id}`,
+    revoke: () => '/tokens/revoke',
+    revokeAll: () => '/tokens/revoke-all',
+    cleanup: () => '/tokens/cleanup',
+  },
+
+  // Audit Logs
+  auditLogs: {
+    index: () => '/audit-logs',
+    export: () => '/audit-logs/export',
+  },
+
+  // Security Events
+  securityEvents: {
+    index: () => '/security-events',
+    resolve: (id: number) => `/security-events/${id}/resolve`,
+  },
+
+  // System Settings
+  settings: {
+    index: () => '/settings',
+    update: () => '/settings/update',
+  },
+} as const;
+
+// Utility function to check if current route is admin (now all routes are admin)
+export const isAdminRoute = (url: string): boolean => {
+  return true; // All routes are now admin routes
+};
+
+// Get admin section from URL
+export const getAdminSection = (url: string): string | null => {
+  const pathParts = url.split('/').filter(Boolean);
+  return pathParts[0] || null;
+};

@@ -6,20 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Models\OAuth\OAuthClient;
 use App\Models\Admin\AuditLog;
 use Illuminate\Http\Request;
+use Illuminate\Http\Middleware\Authorize;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class OAuthClientController extends Controller
 {
-    public function __construct()
+    public static function middleware(): array
     {
-        $this->middleware('auth');
-        $this->middleware('can:oauth_clients.view')->only(['index', 'show']);
-        $this->middleware('can:oauth_clients.create')->only(['create', 'store']);
-        $this->middleware('can:oauth_clients.edit')->only(['edit', 'update']);
-        $this->middleware('can:oauth_clients.delete')->only(['destroy']);
-        $this->middleware('can:oauth_clients.regenerate_secret')->only(['regenerateSecret']);
+        return [
+            'auth',
+            new Authorize('can:oauth_clients.view', only: ['index', 'show']),
+            new Authorize('can:oauth_clients.create', only: ['create', 'store']),
+            new Authorize('can:oauth_clients.edit', only: ['edit', 'update']),
+            new Authorize('can:oauth_clients.delete', only: ['destroy']),
+            new Authorize('can:oauth_clients.regenerate_secret', only: ['regenerateSecret']),
+        ];
     }
 
     public function index(Request $request): Response
@@ -39,9 +42,9 @@ class OAuthClientController extends Controller
         if ($request->filled('status')) {
             $status = $request->get('status');
             if ($status === 'active') {
-                $query->where('is_active', true);
+                $query->where('revoked', false);
             } elseif ($status === 'inactive') {
-                $query->where('is_active', false);
+                $query->where('revoked', true);
             }
         }
 
@@ -61,7 +64,7 @@ class OAuthClientController extends Controller
                 'id' => $client->id,
                 'name' => $client->name,
                 'identifier' => $client->identifier,
-                'is_active' => $client->is_active,
+                'is_active' => !$client->revoked,
                 'is_confidential' => $client->is_confidential,
                 'redirect_uris' => $client->redirect_uris,
                 'grants' => $client->grants,
@@ -73,12 +76,12 @@ class OAuthClientController extends Controller
             ];
         });
 
-        return Inertia::render('Admin/OAuthClients/Index', [
+        return Inertia::render('admin/oauth-clients/index', [
             'clients' => $clients,
             'filters' => $request->only(['search', 'status', 'confidential', 'sort', 'order']),
             'stats' => [
                 'total' => OAuthClient::count(),
-                'active' => OAuthClient::where('is_active', true)->count(),
+                'active' => OAuthClient::where('revoked', false)->count(),
                 'confidential' => OAuthClient::where('is_confidential', true)->count(),
                 'public' => OAuthClient::where('is_confidential', false)->count(),
             ]
@@ -87,9 +90,10 @@ class OAuthClientController extends Controller
 
     public function create(): Response
     {
-        $this->authorize('oauth_clients.create');
+        // Authorization handled by middleware
+        // $this->authorize('oauth_clients.create');
         
-        return Inertia::render('Admin/OAuthClients/Create', [
+        return Inertia::render('admin/oauth-clients/create', [
             'availableGrants' => [
                 'authorization_code' => 'Authorization Code',
                 'client_credentials' => 'Client Credentials',
@@ -107,7 +111,8 @@ class OAuthClientController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('oauth_clients.create');
+        // Authorization handled by middleware
+        // $this->authorize('oauth_clients.create');
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -143,17 +148,18 @@ class OAuthClientController extends Controller
             session()->flash('client_secret', $secret);
         }
 
-        return redirect()->route('admin.oauth-clients.show', $client)
+        return redirect()->route('oauth-clients.show', $client)
             ->with('success', 'Cliente OAuth criado com sucesso.');
     }
 
     public function show(OAuthClient $oauthClient): Response
     {
-        $this->authorize('oauth_clients.view');
+        // Authorization handled by middleware
+        // $this->authorize('oauth_clients.view');
 
         $oauthClient->loadCount(['accessTokens', 'authorizationCodes']);
 
-        return Inertia::render('Admin/OAuthClients/Show', [
+        return Inertia::render('admin/oauth-clients/show', [
             'client' => [
                 'id' => $oauthClient->id,
                 'identifier' => $oauthClient->identifier,
@@ -213,9 +219,10 @@ class OAuthClientController extends Controller
 
     public function edit(OAuthClient $oauthClient): Response
     {
-        $this->authorize('oauth_clients.edit');
+        // Authorization handled by middleware
+        // $this->authorize('oauth_clients.edit');
         
-        return Inertia::render('Admin/OAuthClients/Edit', [
+        return Inertia::render('admin/oauth-clients/edit', [
             'client' => [
                 'id' => $oauthClient->id,
                 'name' => $oauthClient->name,
@@ -243,7 +250,8 @@ class OAuthClientController extends Controller
 
     public function update(Request $request, OAuthClient $oauthClient)
     {
-        $this->authorize('oauth_clients.edit');
+        // Authorization handled by middleware
+        // $this->authorize('oauth_clients.edit');
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -266,13 +274,14 @@ class OAuthClientController extends Controller
             'is_active' => $validated['is_active'] ?? $oauthClient->is_active,
         ]);
 
-        return redirect()->route('admin.oauth-clients.show', $oauthClient)
+        return redirect()->route('oauth-clients.show', $oauthClient)
             ->with('success', 'Cliente OAuth atualizado com sucesso.');
     }
 
     public function destroy(OAuthClient $oauthClient)
     {
-        $this->authorize('oauth_clients.delete');
+        // Authorization handled by middleware
+        // $this->authorize('oauth_clients.delete');
 
         // Revoke all tokens for this client
         $oauthClient->accessTokens()->delete();
@@ -280,13 +289,14 @@ class OAuthClientController extends Controller
         
         $oauthClient->delete();
 
-        return redirect()->route('admin.oauth-clients.index')
+        return redirect()->route('oauth-clients.index')
             ->with('success', 'Cliente OAuth e todos os tokens associados foram excluídos.');
     }
 
     public function regenerateSecret(OAuthClient $oauthClient)
     {
-        $this->authorize('oauth_clients.regenerate_secret');
+        // Authorization handled by middleware
+        // $this->authorize('oauth_clients.regenerate_secret');
 
         if (!$oauthClient->is_confidential) {
             return back()->with('error', 'Apenas clientes confidenciais possuem secret.');
@@ -321,7 +331,8 @@ class OAuthClientController extends Controller
 
     public function revokeTokens(OAuthClient $oauthClient)
     {
-        $this->authorize('oauth_clients.edit');
+        // Authorization handled by middleware
+        // $this->authorize('oauth_clients.edit');
 
         $tokenCount = $oauthClient->accessTokens()->count();
         $codeCount = $oauthClient->authorizationCodes()->count();

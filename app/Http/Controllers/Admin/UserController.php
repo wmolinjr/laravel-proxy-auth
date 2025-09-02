@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin\AuditLog;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Middleware\Authorize;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -14,14 +15,16 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function __construct()
+    public static function middleware(): array
     {
-        $this->middleware('auth');
-        $this->middleware('can:users.view')->only(['index', 'show']);
-        $this->middleware('can:users.create')->only(['create', 'store']);
-        $this->middleware('can:users.edit')->only(['edit', 'update']);
-        $this->middleware('can:users.delete')->only(['destroy']);
-        $this->middleware('can:users.manage_roles')->only(['assignRole', 'removeRole']);
+        return [
+            'auth',
+            new Authorize('can:users.view', only: ['index', 'show']),
+            new Authorize('can:users.create', only: ['create', 'store']),
+            new Authorize('can:users.edit', only: ['edit', 'update']),
+            new Authorize('can:users.delete', only: ['destroy']),
+            new Authorize('can:users.manage_roles', only: ['assignRole', 'removeRole']),
+        ];
     }
 
     public function index(Request $request): Response
@@ -76,13 +79,18 @@ class UserController extends Controller
                 'last_login_at' => $user->last_login_at?->format('M d, Y H:i'),
                 'created_at' => $user->created_at->format('M d, Y'),
                 'deleted_at' => $user->deleted_at?->format('M d, Y'),
-                'roles' => $user->roles->pluck('name'),
+                'roles' => $user->roles->map(function ($role) {
+                    return [
+                        'name' => $role->name,
+                        'display_name' => ucwords(str_replace('-', ' ', $role->name)),
+                    ];
+                }),
                 'is_admin' => $user->isAdmin(),
                 'is_super_admin' => $user->isSuperAdmin(),
             ];
         });
 
-        return Inertia::render('Admin/Users/Index', [
+        return Inertia::render('admin/users/index', [
             'users' => $users,
             'filters' => $request->only(['search', 'role', 'status', 'sort', 'order']),
             'roles' => Role::all()->pluck('name'),
@@ -98,9 +106,10 @@ class UserController extends Controller
 
     public function create(): Response
     {
-        $this->authorize('users.create');
+        // Authorization handled by middleware
+        // $this->authorize('users.create');
         
-        return Inertia::render('Admin/Users/Create', [
+        return Inertia::render('admin/users/create', [
             'roles' => Role::all()->map(function ($role) {
                 return [
                     'value' => $role->name,
@@ -112,7 +121,8 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('users.create');
+        // Authorization handled by middleware
+        // $this->authorize('users.create');
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -147,19 +157,20 @@ class UserController extends Controller
             $user->assignRole($validated['roles']);
         }
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('users.index')
             ->with('success', 'Usuário criado com sucesso.');
     }
 
     public function show(User $user): Response
     {
-        $this->authorize('users.view');
+        // Authorization handled by middleware
+        // $this->authorize('users.view');
 
         $user->load(['roles', 'accessTokens' => function ($query) {
             $query->with('client')->latest()->limit(10);
         }]);
 
-        return Inertia::render('Admin/Users/Show', [
+        return Inertia::render('admin/users/show', [
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -229,9 +240,10 @@ class UserController extends Controller
 
     public function edit(User $user): Response
     {
-        $this->authorize('users.edit');
+        // Authorization handled by middleware
+        // $this->authorize('users.edit');
         
-        return Inertia::render('Admin/Users/Edit', [
+        return Inertia::render('admin/users/edit', [
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -255,7 +267,8 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $this->authorize('users.edit');
+        // Authorization handled by middleware
+        // $this->authorize('users.edit');
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -295,13 +308,14 @@ class UserController extends Controller
             $user->syncRoles($validated['roles']);
         }
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('users.index')
             ->with('success', 'Usuário atualizado com sucesso.');
     }
 
     public function destroy(User $user)
     {
-        $this->authorize('users.delete');
+        // Authorization handled by middleware
+        // $this->authorize('users.delete');
 
         // Prevent deleting super admins
         if ($user->isSuperAdmin()) {
@@ -315,13 +329,14 @@ class UserController extends Controller
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('users.index')
             ->with('success', 'Usuário excluído com sucesso.');
     }
 
     public function restore(User $user)
     {
-        $this->authorize('users.edit');
+        // Authorization handled by middleware
+        // $this->authorize('users.edit');
         
         $user->restore();
         
@@ -330,7 +345,8 @@ class UserController extends Controller
 
     public function forceDelete(User $user)
     {
-        $this->authorize('users.delete');
+        // Authorization handled by middleware
+        // $this->authorize('users.delete');
         
         // Prevent deleting super admins
         if ($user->isSuperAdmin()) {
@@ -339,7 +355,7 @@ class UserController extends Controller
 
         $user->forceDelete();
         
-        return redirect()->route('admin.users.index')
+        return redirect()->route('users.index')
             ->with('success', 'Usuário excluído permanentemente.');
     }
 }

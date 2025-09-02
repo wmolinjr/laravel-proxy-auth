@@ -16,17 +16,21 @@ class OAuthAccessToken extends Model
 
     protected $fillable = [
         'id',
+        'identifier',
         'user_id',
         'client_id',
         'name',
         'scopes',
         'revoked',
+        'revoked_at',
         'expires_at',
     ];
 
     protected $casts = [
         'revoked' => 'boolean',
+        'revoked_at' => 'datetime',
         'expires_at' => 'datetime',
+        'scopes' => 'array',
     ];
 
     /**
@@ -58,6 +62,9 @@ class OAuthAccessToken extends Model
      */
     public function getScopes(): array
     {
+        if (is_array($this->scopes)) {
+            return $this->scopes;
+        }
         return $this->scopes ? explode(' ', $this->scopes) : [];
     }
 
@@ -66,7 +73,7 @@ class OAuthAccessToken extends Model
      */
     public function setScopes(array $scopes): void
     {
-        $this->scopes = implode(' ', $scopes);
+        $this->scopes = $scopes;
     }
 
     /**
@@ -94,6 +101,17 @@ class OAuthAccessToken extends Model
     }
 
     /**
+     * Revoke the token
+     */
+    public function revoke(): void
+    {
+        $this->update([
+            'revoked' => true,
+            'revoked_at' => now(),
+        ]);
+    }
+
+    /**
      * Scope to get only valid tokens
      */
     public function scopeValid($query)
@@ -112,5 +130,13 @@ class OAuthAccessToken extends Model
     {
         return $query->whereNotNull('expires_at')
                     ->where('expires_at', '<=', now());
+    }
+
+    /**
+     * Scope to get revoked tokens
+     */
+    public function scopeRevoked($query)
+    {
+        return $query->where('revoked', true);
     }
 }

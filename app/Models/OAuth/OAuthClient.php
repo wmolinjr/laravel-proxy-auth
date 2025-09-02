@@ -14,15 +14,25 @@ class OAuthClient extends Model
 
     protected $fillable = [
         'id',
+        'identifier',
         'name',
+        'description',
         'secret',
         'redirect',
+        'redirect_uris',
+        'grants',
+        'scopes',
+        'is_confidential',
         'personal_access_client',
         'password_client',
         'revoked',
     ];
 
     protected $casts = [
+        'redirect_uris' => 'array',
+        'grants' => 'array',
+        'scopes' => 'array',
+        'is_confidential' => 'boolean',
         'personal_access_client' => 'boolean',
         'password_client' => 'boolean',
         'revoked' => 'boolean',
@@ -53,7 +63,11 @@ class OAuthClient extends Model
      */
     public function getRedirectUris(): array
     {
-        return array_filter(explode(',', $this->redirect));
+        // Use new redirect_uris column if available, fallback to old redirect column
+        if ($this->redirect_uris) {
+            return $this->redirect_uris;
+        }
+        return array_filter(explode(',', $this->redirect ?? ''));
     }
 
     /**
@@ -61,7 +75,8 @@ class OAuthClient extends Model
      */
     public function setRedirectUris(array $uris): void
     {
-        $this->redirect = implode(',', $uris);
+        $this->redirect_uris = $uris;
+        $this->redirect = implode(',', $uris); // Keep both for compatibility
     }
 
     /**

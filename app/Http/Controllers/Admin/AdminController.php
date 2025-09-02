@@ -9,22 +9,25 @@ use App\Models\OAuth\OAuthClient;
 use App\Models\OAuth\OAuthAccessToken;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Middleware\Authorize;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AdminController extends Controller
 {
-    public function __construct()
+    public static function middleware(): array
     {
-        $this->middleware('auth');
-        $this->middleware('can:dashboard.view');
+        return [
+            'auth',
+            new Authorize('can:dashboard.view'),
+        ];
     }
 
     public function dashboard(): Response
     {
         $stats = $this->getDashboardStats();
-        
-        return Inertia::render('Admin/Dashboard', [
+
+        return Inertia::render('admin/dashboard', [
             'stats' => $stats,
             'recentEvents' => SecurityEvent::with(['user', 'client'])
                 ->latest()
@@ -71,7 +74,6 @@ class AdminController extends Controller
 
     public function analytics(): Response
     {
-        $this->authorize('analytics.view');
 
         $analytics = [
             'users' => [
@@ -112,7 +114,7 @@ class AdminController extends Controller
             ]
         ];
 
-        return Inertia::render('Admin/Analytics', compact('analytics'));
+        return Inertia::render('admin/analytics', compact('analytics'));
     }
 
     private function getDashboardStats(): array
@@ -126,7 +128,7 @@ class AdminController extends Controller
             ],
             'oauth_clients' => [
                 'total' => OAuthClient::count(),
-                'active' => OAuthClient::where('is_active', true)->count(),
+                'active' => OAuthClient::where('revoked', false)->count(),
             ],
             'tokens' => [
                 'active' => OAuthAccessToken::valid()->count(),
@@ -166,7 +168,7 @@ class AdminController extends Controller
         for ($i = $days - 1; $i >= 0; $i--) {
             $date = now()->subDays($i);
             $count = User::whereDate('created_at', $date->toDateString())->count();
-            
+
             $data[] = [
                 'date' => $date->format('M d'),
                 'users' => $count,
@@ -184,7 +186,7 @@ class AdminController extends Controller
         for ($i = $days - 1; $i >= 0; $i--) {
             $date = now()->subDays($i);
             $count = OAuthAccessToken::whereDate('created_at', $date->toDateString())->count();
-            
+
             $data[] = [
                 'date' => $date->format('M d'),
                 'tokens' => $count,
@@ -202,7 +204,7 @@ class AdminController extends Controller
         for ($i = $days - 1; $i >= 0; $i--) {
             $date = now()->subDays($i);
             $count = SecurityEvent::whereDate('created_at', $date->toDateString())->count();
-            
+
             $data[] = [
                 'date' => $date->format('M d'),
                 'events' => $count,
@@ -218,7 +220,7 @@ class AdminController extends Controller
             $size = \DB::select("
                 SELECT pg_size_pretty(pg_database_size(current_database())) as size
             ")[0]->size ?? 'Unknown';
-            
+
             return $size;
         } catch (\Exception $e) {
             return 'Unknown';
