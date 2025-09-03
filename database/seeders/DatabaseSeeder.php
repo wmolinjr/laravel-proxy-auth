@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             AdminSystemSeeder::class,
+            OAuthClientSeeder::class,
         ]);
 
 //        User::factory()->create([

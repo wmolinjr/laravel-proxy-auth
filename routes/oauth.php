@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Route;
  * OpenID Connect Discovery Document
  * https://auth.wmj.com.br/.well-known/openid_configuration
  */
-Route::get('/.well-known/openid_configuration', [DiscoveryController::class, 'openidConfiguration'])
+Route::get('/.well-known/openid-configuration', [DiscoveryController::class, 'openidConfiguration'])
     ->name('oauth.oidc.discovery');
 
 /**

@@ -127,42 +127,56 @@ class OAuthServerService
      */
     protected function configureGrants(): void
     {
-        // Authorization Code Grant (principal para web applications)
-        $authCodeGrant = new AuthCodeGrant(
-            $this->authCodeRepository,
-            $this->refreshTokenRepository,
-            new DateInterval(config('oauth.authorization_code_lifetime'))
-        );
+        try {
+            // Authorization Code Grant (principal para web applications)
+            $authCodeGrant = new AuthCodeGrant(
+                $this->authCodeRepository,
+                $this->refreshTokenRepository,
+                new DateInterval(config('oauth.authorization_code_lifetime', 'PT10M'))
+            );
 
-        // Configurar lifetime do refresh token
-        $authCodeGrant->setRefreshTokenTTL(
-            new DateInterval(config('oauth.refresh_token_lifetime'))
-        );
+            // Configurar lifetime do refresh token
+            $authCodeGrant->setRefreshTokenTTL(
+                new DateInterval(config('oauth.refresh_token_lifetime', 'P1M'))
+            );
 
-        // Enable PKCE (Proof Key for Code Exchange) para segurança adicional
-        $authCodeGrant->setRequireCodeChallengeForPublicClients(false); // Opcional por enquanto
+            // PKCE será configurado quando necessário
+            // Versão atual do League OAuth2 Server pode não suportar setRequireCodeChallengeForPublicClients
+            // Verificar se o método existe antes de chamar
+            if (method_exists($authCodeGrant, 'setRequireCodeChallengeForPublicClients')) {
+                $authCodeGrant->setRequireCodeChallengeForPublicClients(false);
+            }
 
-        $this->authorizationServer->enableGrantType(
-            $authCodeGrant,
-            new DateInterval(config('oauth.access_token_lifetime'))
-        );
+            $this->authorizationServer->enableGrantType(
+                $authCodeGrant,
+                new DateInterval(config('oauth.access_token_lifetime', 'PT1H'))
+            );
 
-        // Refresh Token Grant
-        $refreshGrant = new RefreshTokenGrant($this->refreshTokenRepository);
-        $refreshGrant->setRefreshTokenTTL(
-            new DateInterval(config('oauth.refresh_token_lifetime'))
-        );
+            // Refresh Token Grant
+            $refreshGrant = new RefreshTokenGrant($this->refreshTokenRepository);
+            $refreshGrant->setRefreshTokenTTL(
+                new DateInterval(config('oauth.refresh_token_lifetime', 'P1M'))
+            );
 
-        $this->authorizationServer->enableGrantType(
-            $refreshGrant,
-            new DateInterval(config('oauth.access_token_lifetime'))
-        );
+            $this->authorizationServer->enableGrantType(
+                $refreshGrant,
+                new DateInterval(config('oauth.access_token_lifetime', 'PT1H'))
+            );
 
-        Log::info('OAuth grants configured successfully', [
-            'access_token_lifetime' => config('oauth.access_token_lifetime'),
-            'refresh_token_lifetime' => config('oauth.refresh_token_lifetime'),
-            'auth_code_lifetime' => config('oauth.authorization_code_lifetime'),
-        ]);
+            Log::info('OAuth grants configured successfully', [
+                'access_token_lifetime' => config('oauth.access_token_lifetime'),
+                'refresh_token_lifetime' => config('oauth.refresh_token_lifetime'),
+                'auth_code_lifetime' => config('oauth.authorization_code_lifetime'),
+                'pkce_support' => method_exists($authCodeGrant, 'setRequireCodeChallengeForPublicClients'),
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to configure OAuth grants', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \RuntimeException('OAuth grant configuration failed: ' . $e->getMessage(), 0, $e);
+        }
     }
 
     /**

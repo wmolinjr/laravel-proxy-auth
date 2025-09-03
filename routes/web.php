@@ -12,9 +12,7 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
-// OpenID Connect Discovery endpoint (with hyphen - standard format)
-Route::get('/.well-known/openid-configuration', [OpenIdConnectController::class, 'discovery'])
-    ->name('oidc.discovery');
+// OpenID Connect Discovery endpoint - handled in oauth.php
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

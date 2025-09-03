@@ -37,7 +37,8 @@ class ScopeRepository implements ScopeRepositoryInterface
         array $scopes,
         string $grantType,
         ClientEntityInterface $clientEntity,
-        ?string $userIdentifier = null
+        ?string $userIdentifier = null,
+        ?string $authCodeId = null
     ): array {
         // Validar se os escopos são permitidos
         $validScopes = [];
