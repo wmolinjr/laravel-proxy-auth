@@ -22,8 +22,26 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
      */
     public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity): void
     {
+        $identifier = $refreshTokenEntity->getIdentifier();
+        \Log::error('RefreshToken FULL DEBUG', [
+            'identifier' => $identifier,
+            'identifier_type' => gettype($identifier),
+            'identifier_length' => $identifier ? strlen($identifier) : 0,
+            'has_identifier' => !empty($identifier),
+            'access_token_id' => $refreshTokenEntity->getAccessToken()->getIdentifier(),
+            'entity_class' => get_class($refreshTokenEntity),
+            'methods_available' => get_class_methods($refreshTokenEntity),
+        ]);
+        
+        // If identifier is null or empty, this will cause the database constraint error
+        if (!$identifier) {
+            \Log::error('RefreshToken identifier is null/empty - this will cause database error!');
+            throw new \RuntimeException('RefreshToken identifier cannot be null or empty');
+        }
+        
         OAuthRefreshToken::create([
-            'id' => $refreshTokenEntity->getIdentifier(),
+            'id' => $identifier,
+            'identifier' => $identifier,
             'access_token_id' => $refreshTokenEntity->getAccessToken()->getIdentifier(),
             'revoked' => false,
             'expires_at' => $refreshTokenEntity->getExpiryDateTime(),

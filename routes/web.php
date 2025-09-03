@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use App\Http\Controllers\OpenIdConnectController;
 
@@ -13,6 +14,7 @@ Route::get('/', function () {
 })->name('home');
 
 // OpenID Connect Discovery endpoint - handled in oauth.php
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

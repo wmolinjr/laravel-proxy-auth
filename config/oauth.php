@@ -80,4 +80,15 @@ return [
         'requests_per_minute' => 60,
         'key_prefix' => 'oauth:',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Clock Skew Tolerance
+    |--------------------------------------------------------------------------
+    | 
+    | Tolerance for clock skew between servers (in seconds)
+    | Default: 300 seconds (5 minutes)
+    */
+    
+    'clock_skew_tolerance' => env('OAUTH_CLOCK_SKEW_TOLERANCE', 300),
 ];

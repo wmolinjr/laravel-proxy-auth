@@ -132,7 +132,7 @@ class OAuthServerService
             $authCodeGrant = new AuthCodeGrant(
                 $this->authCodeRepository,
                 $this->refreshTokenRepository,
-                new DateInterval(config('oauth.authorization_code_lifetime', 'PT10M'))
+                new DateInterval(config('oauth.authorization_code_lifetime', 'PT30M'))
             );
 
             // Configurar lifetime do refresh token

@@ -30,6 +30,30 @@ class AuthorizationController extends Controller
     public function authorize(Request $request)
     {
         try {
+            \Log::info('OAuth authorization request started', [
+                'query_params' => $request->query(),
+                'nonce' => $request->query('nonce', 'NOT_PROVIDED'),
+                'state' => $request->query('state', 'NOT_PROVIDED'),
+            ]);
+
+            // Store nonce in cache for later retrieval during token exchange
+            // We need to associate it with something that will be available during token exchange
+            if ($request->has('nonce') && $request->has('state')) {
+                $nonce = $request->query('nonce');
+                $state = $request->query('state');
+                
+                \Log::info('OAuth authorization: Storing nonce for later use', [
+                    'nonce' => $nonce,
+                    'state' => $state,
+                ]);
+                
+                // Store nonce with state as key - mod_auth_openidc will include state in callback
+                cache()->put("oauth_nonce_state_{$state}", $nonce, now()->addMinutes(30));
+                
+                // Also store as latest nonce for simple retrieval during token exchange
+                cache()->put('oauth_latest_nonce', $nonce, now()->addMinutes(30));
+            }
+
             // Convert Laravel request to PSR-7
             $serverRequest = $this->psrFactory->createRequest($request);
 

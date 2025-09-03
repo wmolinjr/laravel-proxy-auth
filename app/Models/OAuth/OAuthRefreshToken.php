@@ -14,6 +14,7 @@ class OAuthRefreshToken extends Model
 
     protected $fillable = [
         'id',
+        'identifier',
         'access_token_id',
         'revoked',
         'expires_at',

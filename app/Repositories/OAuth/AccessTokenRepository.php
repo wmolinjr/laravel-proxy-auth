@@ -41,6 +41,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
         OAuthAccessToken::create([
             'id' => $accessTokenEntity->getIdentifier(),
+            'identifier' => $accessTokenEntity->getIdentifier(),
             'user_id' => $accessTokenEntity->getUserIdentifier(),
             'client_id' => $accessTokenEntity->getClient()->getIdentifier(),
             'scopes' => implode(' ', $scopes),
