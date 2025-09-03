@@ -23,7 +23,8 @@ class ClientRepository implements ClientRepositoryInterface
         return new ClientEntity(
             $client->id,
             $client->name,
-            $client->getRedirectUris()
+            $client->getRedirectUris(),
+            $client->secret
         );
     }
 

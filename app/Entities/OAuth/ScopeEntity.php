@@ -9,12 +9,18 @@ class ScopeEntity implements ScopeEntityInterface
 {
     use ScopeTrait;
 
+    protected string $identifier;
     protected string $description;
 
     public function __construct(string $identifier, string $description = '')
     {
-        $this->setIdentifier($identifier);
+        $this->identifier = $identifier;
         $this->description = $description;
+    }
+
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
     }
 
     public function getDescription(): string

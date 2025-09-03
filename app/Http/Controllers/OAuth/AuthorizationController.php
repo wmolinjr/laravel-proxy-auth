@@ -10,20 +10,18 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Inertia\Inertia;
 use League\OAuth2\Server\Exception\OAuthServerException;
-use Nyholm\Psr7\Factory\Psr17Factory;
-use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpMessageFactory;
+use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 
 class AuthorizationController extends Controller
 {
     protected OAuthServerService $oauthServer;
-    protected PsrHttpMessageFactory $psrFactory;
+    protected PsrHttpFactory $psrFactory;
 
     public function __construct(OAuthServerService $oauthServer)
     {
         $this->oauthServer = $oauthServer;
         
-        $psr17Factory = new Psr17Factory();
-        $this->psrFactory = new PsrHttpMessageFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
+        $this->psrFactory = new PsrHttpFactory();
     }
 
     /**
@@ -65,9 +63,21 @@ class AuthorizationController extends Controller
                 $authRequest->setUser(new UserEntity($user->id));
                 $authRequest->setAuthorizationApproved(true);
                 
-                return $this->oauthServer->getAuthorizationServer()
-                    ->completeAuthorizationRequest($authRequest, response());
+                // Criar uma resposta PSR-7 vazia
+                $psr7Factory = new \Nyholm\Psr7\Factory\Psr17Factory();
+                $psrResponse = $psr7Factory->createResponse();
+
+                // Completar a requisição OAuth
+                $finalResponse = $this->oauthServer->getAuthorizationServer()
+                    ->completeAuthorizationRequest($authRequest, $psrResponse);
+
+                // Converter PSR-7 response para Laravel response
+                return redirect($finalResponse->getHeader('Location')[0] ?? '/')
+                    ->withHeaders($finalResponse->getHeaders());
             }
+
+            // Salvar requisição na sessão para usar no approve()
+            session(['oauth_auth_request' => serialize($authRequest)]);
 
             // Mostrar página de consentimento
             return Inertia::render('OAuth/Authorize', [
@@ -82,6 +92,7 @@ class AuthorizationController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                 ],
+                'csrf_token' => csrf_token(),
             ]);
 
         } catch (OAuthServerException $exception) {
@@ -97,11 +108,24 @@ class AuthorizationController extends Controller
     public function approve(Request $request)
     {
         try {
+            \Log::info('OAuth approve called', [
+                'input' => $request->all(),
+                'has_session' => session()->has('oauth_auth_request'),
+                'user_id' => auth()->id()
+            ]);
+
             $authRequest = unserialize(session('oauth_auth_request'));
             
             if (!$authRequest) {
+                \Log::warning('OAuth auth request not found in session');
                 return redirect()->route('login')->withErrors(['error' => 'Sessão de autorização expirada']);
             }
+
+            \Log::info('OAuth auth request recovered from session', [
+                'client_id' => $authRequest->getClient()->getIdentifier(),
+                'redirect_uri' => $authRequest->getRedirectUri(),
+                'scopes' => array_map(fn($s) => $s->getIdentifier(), $authRequest->getScopes())
+            ]);
 
             $user = auth()->user();
             
@@ -123,8 +147,23 @@ class AuthorizationController extends Controller
 
             session()->forget('oauth_auth_request');
 
-            return $this->oauthServer->getAuthorizationServer()
-                ->completeAuthorizationRequest($authRequest, response());
+            // Criar uma resposta PSR-7 vazia
+            $psr7Factory = new \Nyholm\Psr7\Factory\Psr17Factory();
+            $psrResponse = $psr7Factory->createResponse();
+
+            // Completar a requisição OAuth
+            $finalResponse = $this->oauthServer->getAuthorizationServer()
+                ->completeAuthorizationRequest($authRequest, $psrResponse);
+
+            \Log::info('OAuth authorization completed', [
+                'status' => $finalResponse->getStatusCode(),
+                'location' => $finalResponse->getHeader('Location')[0] ?? 'No redirect',
+                'headers' => array_keys($finalResponse->getHeaders())
+            ]);
+
+            // Converter PSR-7 response para Laravel response
+            return redirect($finalResponse->getHeader('Location')[0] ?? '/')
+                ->withHeaders($finalResponse->getHeaders());
 
         } catch (OAuthServerException $exception) {
             return $this->handleOAuthException($exception);
