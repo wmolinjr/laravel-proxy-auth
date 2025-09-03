@@ -23,21 +23,21 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
     public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity): void
     {
         $identifier = $refreshTokenEntity->getIdentifier();
-        \Log::error('RefreshToken FULL DEBUG', [
-            'identifier' => $identifier,
-            'identifier_type' => gettype($identifier),
-            'identifier_length' => $identifier ? strlen($identifier) : 0,
-            'has_identifier' => !empty($identifier),
-            'access_token_id' => $refreshTokenEntity->getAccessToken()->getIdentifier(),
-            'entity_class' => get_class($refreshTokenEntity),
-            'methods_available' => get_class_methods($refreshTokenEntity),
-        ]);
         
-        // If identifier is null or empty, this will cause the database constraint error
+        // WORKAROUND: If identifier is null, generate one
         if (!$identifier) {
-            \Log::error('RefreshToken identifier is null/empty - this will cause database error!');
-            throw new \RuntimeException('RefreshToken identifier cannot be null or empty');
+            $identifier = bin2hex(random_bytes(32));
+            $refreshTokenEntity->setIdentifier($identifier);
+            \Log::warning('Generated new identifier for RefreshToken', [
+                'generated_identifier' => $identifier
+            ]);
         }
+        
+        \Log::info('RefreshToken persist debug', [
+            'identifier' => $identifier,
+            'access_token_id' => $refreshTokenEntity->getAccessToken()->getIdentifier(),
+            'expires_at' => $refreshTokenEntity->getExpiryDateTime()->format('Y-m-d H:i:s'),
+        ]);
         
         OAuthRefreshToken::create([
             'id' => $identifier,
@@ -46,6 +46,8 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
             'revoked' => false,
             'expires_at' => $refreshTokenEntity->getExpiryDateTime(),
         ]);
+        
+        \Log::info('RefreshToken saved successfully', ['identifier' => $identifier]);
     }
 
     /**
