@@ -9,13 +9,13 @@ use App\Services\OAuth\OAuthServerService;
 use Illuminate\Http\JsonResponse;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use Nyholm\Psr7\Factory\Psr17Factory;
-use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpMessageFactory;
+use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 
 class TokenController extends Controller
 {
     protected OAuthServerService $oauthServer;
     protected JwtService $jwtService;
-    protected PsrHttpMessageFactory $psrFactory;
+    protected PsrHttpFactory $psrFactory;
 
     public function __construct(OAuthServerService $oauthServer, JwtService $jwtService)
     {
@@ -23,7 +23,7 @@ class TokenController extends Controller
         $this->jwtService = $jwtService;
         
         $psr17Factory = new Psr17Factory();
-        $this->psrFactory = new PsrHttpMessageFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
+        $this->psrFactory = new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
     }
 
     /**

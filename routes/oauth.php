@@ -59,28 +59,7 @@ Route::post('/oauth/authorize', [AuthorizationController::class, 'approve'])
     ->middleware(['web', 'auth'])
     ->name('oauth.approve');
 
-/**
- * Token Endpoint (RFC 6749 Section 3.2)
- * POST /oauth/token - Exchange authorization code for tokens
- * 
- * Suporta:
- * - authorization_code grant
- * - refresh_token grant
- * - Retorna access_token, refresh_token e id_token (OIDC)
- */
-Route::post('/oauth/token', [TokenController::class, 'issueToken'])
-    ->middleware(['api'])
-    ->name('oauth.token');
-
-/**
- * UserInfo Endpoint (OIDC Core Section 5.3)
- * GET/POST /oauth/userinfo - Get user information
- * 
- * Retorna claims do usuário baseado nos scopes autorizados
- */
-Route::match(['GET', 'POST'], '/oauth/userinfo', [UserInfoController::class, 'userInfo'])
-    ->middleware(['api'])
-    ->name('oauth.userinfo');
+// ===== API Endpoints movidos para routes/oauth-api.php =====
 
 // ===== Administrative Endpoints =====
 
@@ -95,9 +74,6 @@ Route::get('/oauth/health', [DiscoveryController::class, 'health'])
  * Token Introspection (RFC 7662) - Future implementation
  * POST /oauth/introspect - Token introspection for resource servers
  */
-Route::post('/oauth/introspect', [UserInfoController::class, 'introspect'])
-    ->middleware(['api'])
-    ->name('oauth.introspect');
 
 // ===== Development/Debug Routes (apenas em ambiente local) =====
 

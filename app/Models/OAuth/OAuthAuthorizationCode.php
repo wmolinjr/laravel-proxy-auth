@@ -15,6 +15,7 @@ class OAuthAuthorizationCode extends Model
 
     protected $fillable = [
         'id',
+        'identifier',
         'user_id',
         'client_id',
         'scopes',

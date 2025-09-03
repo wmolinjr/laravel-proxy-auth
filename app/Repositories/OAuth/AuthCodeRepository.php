@@ -28,6 +28,7 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
 
         OAuthAuthorizationCode::create([
             'id' => $authCodeEntity->getIdentifier(),
+            'identifier' => $authCodeEntity->getIdentifier(),
             'user_id' => $authCodeEntity->getUserIdentifier(),
             'client_id' => $authCodeEntity->getClient()->getIdentifier(),
             'scopes' => implode(' ', $scopes),
