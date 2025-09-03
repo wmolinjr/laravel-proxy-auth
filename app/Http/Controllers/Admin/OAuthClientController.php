@@ -7,7 +7,6 @@ use App\Models\OAuth\OAuthClient;
 use App\Models\Admin\AuditLog;
 use App\Services\OAuth\OAuthClientService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Middleware\Authorize;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,11 +21,8 @@ class OAuthClientController extends Controller
     {
         return [
             'auth',
-            new Authorize('can:oauth_clients.view', only: ['index', 'show', 'analytics', 'events', 'usage']),
-            new Authorize('can:oauth_clients.create', only: ['create', 'store']),
-            new Authorize('can:oauth_clients.edit', only: ['edit', 'update', 'toggleStatus', 'toggleMaintenance', 'healthCheck']),
-            new Authorize('can:oauth_clients.delete', only: ['destroy']),
-            new Authorize('can:oauth_clients.regenerate_secret', only: ['regenerateSecret']),
+            'verified',
+            'admin',
         ];
     }
 
@@ -253,6 +249,14 @@ class OAuthClientController extends Controller
                 'recent_errors_count' => $recentErrors->count(),
                 'recent_security_events_count' => $recentSecurityEvents->count(),
                 'critical_events_count' => $recentEvents->where('severity', 'critical')->count(),
+            ],
+            'stats' => [
+                'total_tokens' => $oauthClient->access_tokens_count ?? 0,
+                'active_tokens' => $oauthClient->accessTokens()->where('revoked', false)->where('expires_at', '>', now())->count(),
+                'total_authorizations' => $oauthClient->authorization_codes_count ?? 0,
+                'success_rate' => $todayUsage?->total_success_rate ?? 0,
+                'avg_response_time' => 0, // Placeholder - implement if needed
+                'last_activity' => $oauthClient->last_activity_at?->format('Y-m-d H:i:s'),
             ],
             'clientSecret' => session('client_secret'),
         ]);

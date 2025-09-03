@@ -71,7 +71,7 @@ export interface Permission {
 }
 
 export interface OAuthClient {
-    id: number;
+    id: number | string;
     identifier: string;
     name: string;
     description?: string;
@@ -80,6 +80,7 @@ export interface OAuthClient {
     scopes: string[];
     is_confidential: boolean;
     is_active: boolean;
+    is_revoked?: boolean;
     has_secret?: boolean;
     access_tokens_count?: number;
     authorization_codes_count?: number;
@@ -93,21 +94,30 @@ export interface OAuthClient {
     last_health_check_at?: string;
     health_check_failures: number;
     maintenance_mode: boolean;
+    maintenance_message?: string;
     maintenance_reason?: string;
     environment: 'production' | 'staging' | 'development';
+    contact_email?: string;
     owner_contact?: string;
     technical_contact?: string;
     max_concurrent_tokens: number;
     rate_limit_per_minute: number;
-    tags?: string;
+    tags?: string[] | string;
     website_url?: string;
     documentation_url?: string;
     privacy_policy_url?: string;
     terms_of_service_url?: string;
     logo_url?: string;
+    version?: string;
+    // Audit fields
+    created_by?: number;
+    updated_by?: number;
+    creator?: User;
+    updater?: User;
     // Computed properties
     usage_stats?: OAuthClientUsage;
     recent_events?: OAuthClientEvent[];
+    needs_health_check?: boolean;
 }
 
 export interface OAuthClientUsage {

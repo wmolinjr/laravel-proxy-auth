@@ -222,7 +222,7 @@ class OAuthClientFactory extends Factory
     /**
      * Configure the client with health check enabled
      */
-    public function withHealthCheck(string $url = null, int $interval = 300): static
+    public function withHealthCheck(?string $url = null, int $interval = 300): static
     {
         return $this->state(fn (array $attributes) => [
             'health_check_enabled' => true,

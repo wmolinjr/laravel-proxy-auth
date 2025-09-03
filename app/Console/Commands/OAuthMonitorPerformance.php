@@ -10,7 +10,7 @@ class OAuthMonitorPerformance extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'oauth:monitor-performance 
+    protected $signature = 'oauth:monitor-performance
                             {--report : Generate and display full performance report}
                             {--cache : Monitor cache performance only}
                             {--database : Monitor database performance only}
@@ -291,7 +291,7 @@ class OAuthMonitorPerformance extends Command
     private function showRecommendationsTable(array $recommendations): void
     {
         $this->info('💡 Performance Recommendations:');
-        
+
         $tableData = [];
         foreach ($recommendations as $rec) {
             $priority = match($rec['priority']) {
@@ -300,7 +300,7 @@ class OAuthMonitorPerformance extends Command
                 'low' => '🟢 Low',
                 default => $rec['priority']
             };
-            
+
             $tableData[] = [
                 $rec['type'],
                 $priority,
