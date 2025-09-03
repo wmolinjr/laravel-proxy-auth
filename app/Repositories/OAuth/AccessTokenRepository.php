@@ -44,7 +44,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
             'identifier' => $accessTokenEntity->getIdentifier(),
             'user_id' => $accessTokenEntity->getUserIdentifier(),
             'client_id' => $accessTokenEntity->getClient()->getIdentifier(),
-            'scopes' => implode(' ', $scopes),
+            'scopes' => $scopes,  // ← Salvando como array em vez de string
             'revoked' => false,
             'expires_at' => $accessTokenEntity->getExpiryDateTime(),
         ]);

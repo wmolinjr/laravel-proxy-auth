@@ -61,7 +61,7 @@ class TokenController extends Controller
                 
                 // Get the parsed body and force add client_secret
                 $body = $serverRequest->getParsedBody() ?: [];
-                $body['client_secret'] = 'f91c13173970c335cb58b32bd541d7f2a0b26b418e2f767bd44e9abc4074ca52';
+                $body['client_secret'] = config('oauth.apache_studio_client.secret');
                 
                 $serverRequest = $serverRequest->withParsedBody($body);
                 \Log::info('WORKAROUND: Applied client_secret fix', ['body_keys' => array_keys($body)]);

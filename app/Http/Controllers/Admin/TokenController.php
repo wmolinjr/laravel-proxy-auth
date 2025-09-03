@@ -90,7 +90,7 @@ class TokenController extends Controller
                     'name' => $token->client->name,
                     'identifier' => $token->client->identifier,
                 ] : null,
-                'scopes' => $token->scopes,
+                'scopes' => $token->getScopes(),
                 'expires_at' => $token->expires_at?->format('M d, Y H:i'),
                 'created_at' => $token->created_at->format('M d, Y H:i'),
                 'revoked_at' => $token->revoked_at?->format('M d, Y H:i'),
@@ -144,7 +144,7 @@ class TokenController extends Controller
                     'identifier' => $token->client->identifier,
                     'description' => $token->client->description,
                 ] : null,
-                'scopes' => $token->scopes,
+                'scopes' => $token->getScopes(),
                 'expires_at' => $token->expires_at?->format('M d, Y H:i:s'),
                 'created_at' => $token->created_at->format('M d, Y H:i:s'),
                 'updated_at' => $token->updated_at->format('M d, Y H:i:s'),
@@ -194,7 +194,7 @@ class TokenController extends Controller
             [
                 'user_id' => $token->user_id,
                 'client_id' => $token->client_id,
-                'scopes' => $token->scopes,
+                'scopes' => $token->getScopes(),
             ]
         );
 

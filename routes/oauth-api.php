@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
  * POST /oauth/token - Exchange authorization code for tokens
  */
 Route::post('/oauth/token', [TokenController::class, 'issueToken'])
+    ->middleware('throttle:60,1')
     ->name('oauth.token');
 
 /**
