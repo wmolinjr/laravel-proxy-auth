@@ -24,30 +24,41 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
     {
         $identifier = $refreshTokenEntity->getIdentifier();
         
-        // WORKAROUND: If identifier is null, generate one
-        if (!$identifier) {
-            $identifier = bin2hex(random_bytes(32));
+        // Always ensure we have a valid identifier
+        if (empty($identifier)) {
+            $identifier = bin2hex(random_bytes(40));
             $refreshTokenEntity->setIdentifier($identifier);
-            \Log::warning('Generated new identifier for RefreshToken', [
-                'generated_identifier' => $identifier
+            \Log::info('Generated identifier for RefreshToken', [
+                'generated_identifier' => $identifier,
+                'reason' => 'identifier_was_empty'
             ]);
         }
         
         \Log::info('RefreshToken persist debug', [
             'identifier' => $identifier,
+            'identifier_length' => strlen($identifier),
             'access_token_id' => $refreshTokenEntity->getAccessToken()->getIdentifier(),
             'expires_at' => $refreshTokenEntity->getExpiryDateTime()->format('Y-m-d H:i:s'),
         ]);
         
-        OAuthRefreshToken::create([
-            'id' => $identifier,
-            'identifier' => $identifier,
-            'access_token_id' => $refreshTokenEntity->getAccessToken()->getIdentifier(),
-            'revoked' => false,
-            'expires_at' => $refreshTokenEntity->getExpiryDateTime(),
-        ]);
-        
-        \Log::info('RefreshToken saved successfully', ['identifier' => $identifier]);
+        try {
+            OAuthRefreshToken::create([
+                'id' => $identifier,
+                'identifier' => $identifier,
+                'access_token_id' => $refreshTokenEntity->getAccessToken()->getIdentifier(),
+                'revoked' => false,
+                'expires_at' => $refreshTokenEntity->getExpiryDateTime(),
+            ]);
+            
+            \Log::info('RefreshToken saved successfully', ['identifier' => $identifier]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to save RefreshToken', [
+                'identifier' => $identifier,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
     }
 
     /**

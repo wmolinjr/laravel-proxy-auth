@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\OAuth\OAuthAccessToken;
 use App\Services\OAuth\JwtService;
 use App\Services\OAuth\OAuthServerService;
+use App\Services\OAuthAuditService;
 use Illuminate\Http\JsonResponse;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -106,6 +107,9 @@ class TokenController extends Controller
                 'grant_type' => $this->extractGrantType($serverRequest),
                 'has_id_token' => isset($responseBody['id_token']),
             ]);
+
+            // Audit token issuance
+            $this->auditTokenIssuance($serverRequest, $responseBody);
 
             return response()->json($responseBody)
                 ->header('Cache-Control', 'no-store')
@@ -377,5 +381,68 @@ class TokenController extends Controller
             ]);
             return null;
         }
+    }
+
+    /**
+     * Audit token issuance for security and compliance
+     */
+    private function auditTokenIssuance($serverRequest, array $responseBody): void
+    {
+        try {
+            $clientId = $this->extractClientId($serverRequest);
+            $grantType = $this->extractGrantType($serverRequest);
+            $userId = $this->extractUserId($serverRequest);
+            $scopes = $this->extractScopes($serverRequest);
+            
+            // Extract token ID from JWT if possible
+            $tokenId = null;
+            if (isset($responseBody['access_token'])) {
+                // For audit purposes, we'll use a hash of the token
+                $tokenId = hash('sha256', $responseBody['access_token']);
+            }
+            
+            // Log token issuance
+            OAuthAuditService::logTokenIssued(
+                clientId: $clientId,
+                userId: $userId,
+                grantType: $grantType,
+                scopes: $scopes,
+                tokenId: $tokenId
+            );
+            
+            // Log client authentication success
+            OAuthAuditService::logClientAuthentication(
+                clientId: $clientId,
+                successful: true,
+                method: 'client_secret_post'
+            );
+            
+        } catch (\Exception $e) {
+            \Log::warning('Failed to audit token issuance', [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Extract scopes from request
+     */
+    private function extractScopes($serverRequest): array
+    {
+        $body = $serverRequest->getParsedBody() ?: [];
+        $scope = $body['scope'] ?? '';
+        
+        return $scope ? explode(' ', $scope) : [];
+    }
+
+    /**
+     * Extract user ID from request (for refresh tokens)
+     */
+    private function extractUserId($serverRequest): ?int
+    {
+        // For authorization_code flow, user ID would be embedded in the code
+        // For refresh_token flow, we could extract from the token
+        // This is a simplified implementation
+        return auth()->id();
     }
 }
