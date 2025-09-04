@@ -70,7 +70,7 @@ export interface Permission {
     updated_at: string;
 }
 
-export interface OAuthClient {
+export interface OAuthClient extends Record<string, unknown> {
     id: number | string;
     identifier: string;
     name: string;
@@ -167,7 +167,7 @@ export interface OAuthClientEvent {
     resolved_by?: User;
 }
 
-export interface OAuthToken {
+export interface OAuthToken extends Record<string, unknown> {
     id: number;
     identifier: string;
     user?: User;
@@ -183,7 +183,7 @@ export interface OAuthToken {
     updated_at: string;
 }
 
-export interface AuditLog {
+export interface AuditLog extends Record<string, unknown> {
     id: number;
     event_type: string;
     entity_type?: string;
@@ -197,7 +197,7 @@ export interface AuditLog {
     created_at: string;
 }
 
-export interface SecurityEvent {
+export interface SecurityEvent extends Record<string, unknown> {
     id: number;
     event_type: string;
     event_description?: string;

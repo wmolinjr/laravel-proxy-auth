@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { adminRoutes } from '@/lib/admin-routes';
 import { type BreadcrumbItem, type OAuthClient, type OAuthClientEvent, type PaginatedResponse } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Calendar, Filter, Search, AlertTriangle, Info, AlertCircle, XCircle } from 'lucide-react';
+import { Calendar, Search, AlertTriangle, Info, AlertCircle, XCircle } from 'lucide-react';
 
 interface OAuthClientEventsProps {
     client: OAuthClient;
@@ -45,7 +45,7 @@ const severityColors = {
     critical: 'text-red-800 dark:text-red-300',
 };
 
-export default function OAuthClientEvents({ client, events, filters, summary }: OAuthClientEventsProps) {
+export default function OAuthClientEvents({ client, events, summary }: OAuthClientEventsProps) {
     const currentBreadcrumbs = [
         ...breadcrumbs,
         { title: client.name, href: adminRoutes.oauthClients.show(client.id) },

@@ -66,7 +66,6 @@ export default function UsersIndex({ users, filters, roles, stats }: UsersIndexP
 
   const handleDeleteUser = (user: User) => {
     router.delete(adminRoutes.users.destroy(user.id));
-    setUserToDelete(null);
   };
 
   const columns: Column<User>[] = [

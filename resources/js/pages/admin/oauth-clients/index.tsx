@@ -1,9 +1,9 @@
 import { DataTable, Column, StatusBadge, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { HealthStatus, HealthIndicator } from '@/components/ui/health-status';
-import { MetricCard, UsageMetrics } from '@/components/ui/monitoring-metrics';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { HealthIndicator } from '@/components/ui/health-status';
+import { MetricCard } from '@/components/ui/monitoring-metrics';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
   SelectContent,

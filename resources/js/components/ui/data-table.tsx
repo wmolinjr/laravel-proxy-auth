@@ -126,12 +126,12 @@ export function DataTable<T extends Record<string, unknown>>({
               </TableRow>
             ) : (
               data.map((row, index) => (
-                <TableRow key={row.id || index}>
+                <TableRow key={String(row.id) || index}>
                   {columns.map((column) => (
-                    <TableCell key={`${row.id || index}-${column.key}`} className={column.className}>
+                    <TableCell key={`${String(row.id) || index}-${column.key}`} className={column.className}>
                       {column.render
                         ? column.render(row[column.key], row)
-                        : row[column.key]}
+                        : String(row[column.key] ?? '')}
                     </TableCell>
                   ))}
                 </TableRow>

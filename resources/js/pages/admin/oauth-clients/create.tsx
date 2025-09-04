@@ -47,7 +47,7 @@ interface FormData {
 export default function CreateOAuthClient({ grants, scopes, environments }: Props) {
   const [redirectUriInput, setRedirectUriInput] = useState('')
 
-  const { data, setData, post, processing, errors, reset } = useForm<FormData>({
+  const { data, setData, post, processing, errors } = useForm<FormData>({
     name: '',
     description: '',
     redirect_uris: [],

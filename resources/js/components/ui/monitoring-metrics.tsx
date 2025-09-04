@@ -78,10 +78,6 @@ export function UsageMetrics({ usage, className }: UsageMetricsProps) {
     );
   }
 
-  const authSuccessRate = usage.authorization_requests > 0 
-    ? (usage.successful_authorizations / usage.authorization_requests * 100).toFixed(1)
-    : '0';
-
   const tokenSuccessRate = usage.token_requests > 0
     ? (usage.successful_tokens / usage.token_requests * 100).toFixed(1)
     : '0';

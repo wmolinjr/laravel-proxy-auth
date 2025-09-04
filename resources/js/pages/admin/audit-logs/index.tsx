@@ -64,7 +64,7 @@ export default function AuditLogsIndex({
       label: 'Event Type',
       render: (value) => (
         <Badge variant="outline" className="font-mono text-xs">
-          {value.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+          {String(value).replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
         </Badge>
       ),
     },

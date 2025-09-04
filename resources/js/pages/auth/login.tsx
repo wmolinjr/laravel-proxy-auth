@@ -1,4 +1,3 @@
-import AuthenticatedSessionController from '@/actions/App/Http/Controllers/Auth/AuthenticatedSessionController';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             <Head title="Log in" />
 
             <Form 
-                {...AuthenticatedSessionController.store.form()} 
+                method="post"
+                action="/login" 
                 resetOnSuccess={['password']} 
                 className="flex flex-col gap-6"
             >

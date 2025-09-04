@@ -55,9 +55,9 @@ export default function SystemSettings({ settings }: SystemSettingsProps) {
     if (type === 'boolean') {
       processedValue = Boolean(value);
     } else if (type === 'integer') {
-      processedValue = parseInt(value) || 0;
+      processedValue = parseInt(String(value)) || 0;
     } else if (type === 'float') {
-      processedValue = parseFloat(value) || 0;
+      processedValue = parseFloat(String(value)) || 0;
     }
 
     setFormData(prev => ({ ...prev, [key]: processedValue }));
@@ -106,7 +106,7 @@ export default function SystemSettings({ settings }: SystemSettingsProps) {
         return (
           <Input
             type="number"
-            value={value || ''}
+            value={String(value || '')}
             onChange={(e) => handleSettingChange(setting.key, e.target.value, 'integer')}
             className={isChanged ? 'border-orange-500' : ''}
           />
@@ -117,7 +117,7 @@ export default function SystemSettings({ settings }: SystemSettingsProps) {
             setting.description?.toLowerCase().includes('notes')) {
           return (
             <Textarea
-              value={value || ''}
+              value={String(value || '')}
               onChange={(e) => handleSettingChange(setting.key, e.target.value, 'string')}
               className={isChanged ? 'border-orange-500' : ''}
               rows={3}
@@ -127,7 +127,7 @@ export default function SystemSettings({ settings }: SystemSettingsProps) {
         return (
           <Input
             type="text"
-            value={value || ''}
+            value={String(value || '')}
             onChange={(e) => handleSettingChange(setting.key, e.target.value, 'string')}
             className={isChanged ? 'border-orange-500' : ''}
           />

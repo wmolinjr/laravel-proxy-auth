@@ -127,7 +127,7 @@ export default function OAuthClientAnalytics({ client, analytics }: OAuthClientA
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                {analytics.daily_usage.slice(0, 7).map((day, index) => (
+                                {analytics.daily_usage.slice(0, 7).map((day) => (
                                     <div key={day.date} className="flex items-center justify-between">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium">
