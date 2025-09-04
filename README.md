@@ -50,81 +50,78 @@ A production-ready, enterprise-grade OAuth2/OpenID Connect Identity Provider bui
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- PHP 8.2 or higher
-- Composer
-- Node.js 20 or higher
-- Database (MySQL, PostgreSQL, or SQLite)
-- Redis (optional, for caching and queues)
+### Option 1: Laravel Sail (Recommended for Development)
 
-### Installation
+**Prerequisites:** Docker Desktop
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/laravel-oauth-provider.git
-   cd laravel-oauth-provider
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/your-username/laravel-oauth-provider.git
+cd laravel-oauth-provider
 
-2. **Install PHP dependencies**
-   ```bash
-   composer install
-   ```
+# Install dependencies via Docker (no local PHP required)
+docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/var/www/html" -w /var/www/html laravelsail/php83-composer:latest composer install --ignore-platform-reqs
 
-3. **Install Node.js dependencies**
-   ```bash
-   npm install
-   ```
+# Setup environment
+cp .env.example .env
 
-4. **Environment setup**
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
+# Start development environment
+./vendor/bin/sail up -d
 
-5. **Configure your database** in `.env`
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=oauth_provider
-   DB_USERNAME=your_username
-   DB_PASSWORD=your_password
-   ```
+# Generate keys and setup database
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan oauth:keys
+./vendor/bin/sail artisan migrate --seed
 
-6. **Run migrations and seeders**
-   ```bash
-   php artisan migrate
-   php artisan db:seed
-   ```
+# Install frontend dependencies and build
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run dev
+```
 
-7. **Generate OAuth2 keys**
-   ```bash
-   php artisan oauth:keys
-   ```
+**Access Points:**
+- **Application**: http://localhost
+- **Mailpit**: http://localhost:8025
+- **Database**: PostgreSQL on localhost:5432
 
-8. **Build frontend assets**
-   ```bash
-   npm run build
-   # or for development
-   npm run dev
-   ```
+### Option 2: Local Development
 
-9. **Start the development server**
-   ```bash
-   composer run dev
-   ```
+**Prerequisites:** PHP 8.2+, Composer, Node.js 20+, Database
 
-The application will be available at `http://localhost:8000`.
+```bash
+# Clone the repository
+git clone https://github.com/your-username/laravel-oauth-provider.git
+cd laravel-oauth-provider
+
+# Install dependencies
+composer install
+npm install
+
+# Setup environment
+cp .env.example .env
+php artisan key:generate
+
+# Configure database in .env, then:
+php artisan migrate --seed
+php artisan oauth:keys
+
+# Build assets and start server
+npm run build
+php artisan serve
+```
+
+**Access:** http://localhost:8000
 
 ## 📖 Documentation
 
 ### Quick Links
 - [📋 Installation Guide](docs/installation.md)
+- [🛠️ Development Guide](docs/development.md)
 - [⚙️ Configuration](docs/configuration.md)
 - [🔧 OAuth2 Setup](docs/oauth2-setup.md)
 - [📊 Monitoring & Metrics](docs/monitoring.md)
 - [🛡️ Security](docs/security.md)
 - [🚀 Deployment](docs/deployment.md)
+- [🔧 Apache Configuration](docs/apache-configuration.md)
 - [🔌 API Reference](docs/api-reference.md)
 
 ### Core Concepts
