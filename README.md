@@ -56,8 +56,8 @@ A production-ready, enterprise-grade OAuth2/OpenID Connect Identity Provider bui
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/laravel-oauth-provider.git
-cd laravel-oauth-provider
+git clone https://github.com/wmolinjr/laravel-proxy-auth.git
+cd laravel-proxy-auth
 
 # Install dependencies via Docker (no local PHP required)
 docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/var/www/html" -w /var/www/html laravelsail/php83-composer:latest composer install --ignore-platform-reqs
@@ -89,8 +89,8 @@ cp .env.example .env
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/laravel-oauth-provider.git
-cd laravel-oauth-provider
+git clone https://github.com/wmolinjr/laravel-proxy-auth.git
+cd laravel-proxy-auth
 
 # Install dependencies
 composer install
@@ -318,8 +318,8 @@ This project is open-sourced software licensed under the [MIT License](LICENSE).
 ## 🆘 Support
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/your-username/laravel-oauth-provider/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/laravel-oauth-provider/discussions)
+- **Issues**: [GitHub Issues](https://github.com/wmolinjr/laravel-proxy-auth/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/wmolinjr/laravel-proxy-auth/discussions)
 - **Security**: Please report security vulnerabilities privately to [security@yourdomain.com](mailto:security@yourdomain.com)
 
 ## 🌟 Acknowledgments
@@ -333,10 +333,10 @@ This project builds upon excellent open-source libraries:
 
 ## 📊 Project Stats
 
-![GitHub stars](https://img.shields.io/github/stars/your-username/laravel-oauth-provider?style=social)
-![GitHub forks](https://img.shields.io/github/forks/your-username/laravel-oauth-provider?style=social)
-![GitHub issues](https://img.shields.io/github/issues/your-username/laravel-oauth-provider)
-![GitHub last commit](https://img.shields.io/github/last-commit/your-username/laravel-oauth-provider)
+![GitHub stars](https://img.shields.io/github/stars/wmolinjr/laravel-proxy-auth?style=social)
+![GitHub forks](https://img.shields.io/github/forks/wmolinjr/laravel-proxy-auth?style=social)
+![GitHub issues](https://img.shields.io/github/issues/wmolinjr/laravel-proxy-auth)
+![GitHub last commit](https://img.shields.io/github/last-commit/wmolinjr/laravel-proxy-auth)
 
 ---
 
